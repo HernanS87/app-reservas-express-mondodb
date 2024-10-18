@@ -1,0 +1,20 @@
+{
+  "name": "app-reservas-restaurando-mario",
+  "version": "1.0.0",
+  "description": "API para realizar reservas a un restaurante",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "standard": "^17.1.2"
+  },
+  "dependencies": {
+    "express": "4.21.1"
+  }
+}
