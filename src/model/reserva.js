@@ -38,7 +38,7 @@ const reservaSchema = new Schema({
   },
   estado: {
     type: String,
-    enum: ["Confirmada", "Cancelada"],
+    enum: ["CONFIRMADA", "CANCELADA"],
     required: true,
   },
   mesa: {
@@ -57,6 +57,5 @@ reservaSchema.set("toJSON", {
     delete returnedObject.__v;
   },
 });
-
 
 export const Reserva = model("Reserva", reservaSchema);
