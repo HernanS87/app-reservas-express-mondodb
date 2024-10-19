@@ -12,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "eslint": "^8.57.1",
     "standard": "^17.1.2"
   },
   "dependencies": {
