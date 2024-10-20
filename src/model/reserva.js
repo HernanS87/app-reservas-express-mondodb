@@ -20,7 +20,7 @@ const reservaSchema = new Schema({
     type: Number,
     required: true,
     min: [1, "Debe haber al menos 1 persona."], // Mínimo 1 persona
-    max: [6, "No puede haber más de 6 personas."], // Máximo 6 personas
+    max: [12, "No puede haber más de 12 personas."], // Máximo 12 personas
   },
   fecha: {
     type: Date,
@@ -41,11 +41,12 @@ const reservaSchema = new Schema({
     enum: ["CONFIRMADA", "CANCELADA"],
     required: true,
   },
-  mesa: {
-    type: Schema.Types.ObjectId,
-    ref: "Mesa",
-    required: true,
-  },
+  mesa: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Mesa",
+    },
+  ],
 });
 
 reservaSchema.index({ fecha: -1, hora: 1 }); // Un índice compuesto mejora el rendimiento de las consultas que filtran por ambos campos o al menos por el primer campo (fecha en este caso)
