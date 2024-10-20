@@ -15,16 +15,21 @@ GET http://localhost:1234/reservas/
 GET http://localhost:1234/reservas/67129cb374fd2cd2d0e73107
 
 
+### Eliminar reserva
+
+DELETE http://localhost:1234/reservas/6715850526d91dcb368c1646
+
+
 ### Crear reserva
 POST http://localhost:1234/reservas
 Content-Type: application/json
 
 {
-  "nombreCliente": "Ema",
-  "email": "ema@gmail.com",
+  "nombreCliente": "Hernan Santarelli",
+  "email": "hernansantarelli87@gmail.com",
   "fecha": "2024-10-17",
   "hora": "12:00",
-  "cantidadPersonas": 2,
+  "cantidadPersonas": 7,
   "estado": "CONFIRMADA"
 }
 
@@ -37,10 +42,10 @@ POST http://localhost:1234/mesas
 Content-Type: application/json
 
 {
-  "capacidad": 6,
+  "capacidad": 2,
   "estado": "DISPONIBLE"
 }
 
 ### TRAER MESAS
-GET http://localhost:1234/mesas
+GET http://localhost:1234/mesas/6715848826d91dcb368c163f
 Content-Type: application/json

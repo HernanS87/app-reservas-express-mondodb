@@ -39,10 +39,10 @@ export class MesaRepository {
     }).sort({ capacidad: 1 });
   }
 
-  setEstadoOcupada(mesaIds) {
+  cambiarEstadoMesa(mesaIds, estado) {
     return Mesa.updateMany(
       { _id: { $in: mesaIds } }, // Filtrar mesas por ID
-      { $set: { estado: "OCUPADA" } } // Cambiar el estado
+      { $set: { estado: estado } } // Cambiar el estado
     );
   }
 }

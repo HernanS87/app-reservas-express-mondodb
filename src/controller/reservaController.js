@@ -40,6 +40,22 @@ export class ReservaController {
       res.status(500).json({ message: error.message });
     }
   }
+
   async update(req, res) {}
-  async delete(req, res) {}
+
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const reserva = await reservaService.delete(id);
+      return reserva
+        ? res.json({ message: "Se eliminó la reserva con éxito!!" })
+        : res.status(404).json({ message: "Reserva not found" });
+    } catch (error) {
+      console.error(
+        pc.red("❌ Error al buscar una reserva para eliminar por id:"),
+        error.message
+      );
+      res.status(500).json({ message: error.message });
+    }
+  }
 }

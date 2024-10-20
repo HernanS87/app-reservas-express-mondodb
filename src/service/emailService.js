@@ -1,32 +1,39 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Configuración del transporte
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true para 465, false para otros puertos
-    auth: {
-        user: 'emimimoutd@gmail.com', // tu email
-        pass: 'xuwn ejac asnm isaa'          // tu contraseña
-    }
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 const formatearFecha = (fecha) => {
-    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Intl.DateTimeFormat('es-AR', opciones).format(fecha);
+  const opciones = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  return new Intl.DateTimeFormat("es-AR", opciones).format(fecha);
 };
 
-// Función para enviar el correo de confirmación
 export async function enviarCorreoConfirmacion(reserva) {
-    const { email, cantidadPersonas, fecha, hora, nombreCliente } = reserva;
+  const { email, cantidadPersonas, fecha, hora, nombreCliente } = reserva;
 
-  const  fechaFormateada =  formatearFecha(fecha);
+  const fechaFormateada = formatearFecha(fecha);
 
-    const mailOptions = {
-        from: '"Restaurante Don Mario" <emimimoutd@gmail.com>',
-        to: email,
-        subject: 'Restaurante Don Mario - Confirmación de reserva',
-        html: `
+  const mailOptions = {
+    from: '"Restaurante Don Mario" <emimimoutd@gmail.com>',
+    to: email,
+    subject: "Restaurante Don Mario - Confirmación de reserva",
+    html: `
             <h2>Hola ${nombreCliente}!</h2>
             <p>A continuación te enviamos los datos de tu reserva en nuestro restaurante:</p>
             <ul>
@@ -35,13 +42,13 @@ export async function enviarCorreoConfirmacion(reserva) {
                 <li><strong>Cantidad de personas:</strong> ${cantidadPersonas}</li>
             </ul>
             <p>¡Gracias por confiar en nosotros! Esperamos verte pronto.</p>
-        `
-    };
+        `,
+  };
 
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Correo enviado correctamente');
-    } catch (error) {
-        console.error('Error al enviar el correo: ', error);
-    }
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Correo enviado correctamente");
+  } catch (error) {
+    console.error("Error al enviar el correo: ", error);
+  }
 }

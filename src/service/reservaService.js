@@ -1,5 +1,6 @@
 import { MesaRepository } from "../repository/mesaRepository.js";
 import { ReservaRepository } from "../repository/reservaRepository.js";
+import { enviarCorreoConfirmacion } from "./emailService.js";
 
 const reservaRepository = new ReservaRepository();
 const mesaRepository = new MesaRepository();
@@ -21,15 +22,22 @@ export class ReservaService {
     const newReserva = await reservaRepository.save(reserva);
 
     // Cambiar el estado de las mesas a 'Ocupado'
-    const mesaIds = newReserva.mesa;
+    await mesaRepository.cambiarEstadoMesa(newReserva.mesa, "OCUPADA");
 
-    await mesaRepository.setEstadoOcupada(mesaIds);
+    await enviarCorreoConfirmacion(newReserva);
 
     return newReserva;
   }
 
   async delete(id) {
-    return await reservaRepository.delete(id);
+    const reservaDeleted = await reservaRepository.delete(id);
+
+    if (reservaDeleted) {
+      console.log("RESERVA ELIMINADA", reservaDeleted);
+      await mesaRepository.cambiarEstadoMesa(reservaDeleted.mesa, "DISPONIBLE");
+    }
+
+    return reservaDeleted;
   }
 
   async update() {}
@@ -53,10 +61,21 @@ export class ReservaService {
       );
 
     if (mesaGrandeCercana) {
-      return [mesaGrandeCercana._id]; // Si encontramos una mesa grande cercana, la asignamos y terminamos
+      return [mesaGrandeCercana._id];
     }
 
-    // Obtener todas las mesas disponibles
+    let { personasRestantes, mesasAsignadas } =
+      await this.asignarMesasConMenorCapacidad(cantidadPersonas);
+
+    // Si aún quedan personas y no se pueden acomodar, tirar error
+    if (personasRestantes > 0) {
+      throw new Error("No hay suficientes mesas disponibles para esta reserva");
+    }
+
+    return mesasAsignadas;
+  }
+
+  async asignarMesasConMenorCapacidad(cantidadPersonas) {
     const mesasDisponibles = await mesaRepository.getMesasDisponibles();
 
     // 3. Buscar la mesa más pequeña cercana (capacidad < cantidadPersonas, pero la más grande posible)
@@ -95,12 +114,6 @@ export class ReservaService {
         }
       }
     }
-
-    // Si aún quedan personas y no se pueden acomodar, lanzar error
-    if (personasRestantes > 0) {
-      throw new Error("No hay suficientes mesas disponibles para esta reserva");
-    }
-
-    return mesasAsignadas;
+    return { personasRestantes, mesasAsignadas };
   }
 }
