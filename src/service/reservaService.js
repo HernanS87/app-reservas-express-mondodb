@@ -1,41 +1,44 @@
 import { MesaRepository } from "../repository/mesaRepository.js";
 import { ReservaRepository } from "../repository/reservaRepository.js";
 
+const reservaRepository = new ReservaRepository();
+const mesaRepository = new MesaRepository();
+
 export class ReservaService {
   // ------------------------- CRUD ----------------------------------
 
-  static async getAll() {
-    return await ReservaRepository.getAll();
+  async getAll() {
+    return await reservaRepository.getAll();
   }
 
-  static async getById(id) {
-    return await ReservaRepository.getById(id);
+  async getById(id) {
+    return await reservaRepository.getById(id);
   }
 
-  static async save(reserva) {
+  async save(reserva) {
     reserva.mesa = await this.asignarMesas(reserva.cantidadPersonas);
 
-    const newReserva = await ReservaRepository.save(reserva);
+    const newReserva = await reservaRepository.save(reserva);
 
     // Cambiar el estado de las mesas a 'Ocupado'
     const mesaIds = newReserva.mesa;
 
-    await MesaRepository.setEstadoOcupada(mesaIds);
+    await mesaRepository.setEstadoOcupada(mesaIds);
 
     return newReserva;
   }
 
-  static async delete(id) {
-    return await ReservaRepository.delete(id);
+  async delete(id) {
+    return await reservaRepository.delete(id);
   }
 
-  static async update() {}
+  async update() {}
 
   // ------------------------- OTROS ----------------------------------
 
-  static async asignarMesas(cantidadPersonas) {
+  async asignarMesas(cantidadPersonas) {
     // 1. Buscar si hay una mesa con capacidad exacta
-    const mesaExacta = await MesaRepository.getMesaDisponiblePorCapacidad(
+    const mesaExacta = await mesaRepository.getMesaDisponiblePorCapacidad(
       cantidadPersonas
     );
 
@@ -45,7 +48,7 @@ export class ReservaService {
 
     // 2. Busca la mesa más grande y cercana a la cantidad de personas
     const mesaGrandeCercana =
-      await MesaRepository.getMesaDisponiblePorCapacidadMayorMasCercana(
+      await mesaRepository.getMesaDisponiblePorCapacidadMayorMasCercana(
         cantidadPersonas
       );
 
@@ -54,7 +57,7 @@ export class ReservaService {
     }
 
     // Obtener todas las mesas disponibles
-    const mesasDisponibles = await MesaRepository.getMesasDisponibles();
+    const mesasDisponibles = await mesaRepository.getMesasDisponibles();
 
     // 3. Buscar la mesa más pequeña cercana (capacidad < cantidadPersonas, pero la más grande posible)
     const mesaPequeñaCercana = mesasDisponibles
@@ -72,9 +75,12 @@ export class ReservaService {
       personasRestantes -= mesaPequeñaCercana.capacidad;
     }
 
+    const mesasDisponiblesMenorCantPers = mesasDisponibles.filter(
+      (mesa) => mesa.capacidad <= cantidadPersonas
+    );
     // 4. Si aún quedan personas, combinar mesas más pequeñas disponibles
     if (personasRestantes > 0) {
-      for (let mesa of mesasDisponibles) {
+      for (let mesa of mesasDisponiblesMenorCantPers) {
         if (personasRestantes <= 0) break;
 
         if (mesa.capacidad >= personasRestantes) {

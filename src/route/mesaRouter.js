@@ -1,11 +1,13 @@
 import { Router } from "express";
 import { MesaController } from "../controller/mesaController.js";
 
+const mesaController = new MesaController();
+
 export const mesaRouter = Router();
 
-mesaRouter.get("/", MesaController.getAll);
-mesaRouter.post("/", MesaController.save);
+mesaRouter.get("/", mesaController.getAll);
+mesaRouter.post("/", mesaController.save);
 
-mesaRouter.get("/:id", MesaController.getById);
-mesaRouter.delete("/:id", MesaController.delete);
-mesaRouter.patch("/:id", MesaController.update);
+mesaRouter.get("/:id", mesaController.getById);
+mesaRouter.delete("/:id", mesaController.delete);
+mesaRouter.patch("/:id", mesaController.update);

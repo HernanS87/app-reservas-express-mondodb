@@ -2,20 +2,23 @@ import { Mesa } from "../model/mesa.js";
 import { MesaService } from "../service/mesaService.js";
 import pc from "picocolors";
 
+const mesaService = new MesaService();
+
 export class MesaController {
-  static async getAll(req, res) {
+  async getAll(req, res) {
     try {
-      const mesas = await MesaService.getAll();
+      const mesas = await mesaService.getAll();
       res.json(mesas);
     } catch (error) {
       console.error(pc.red("❌ Error al buscar las mesas:"), error.message);
       res.status(500).json({ message: error.message });
     }
   }
-  static async getById(req, res) {
+
+  async getById(req, res) {
     try {
       const { id } = req.params;
-      const mesa = await MesaService.getById(id);
+      const mesa = await mesaService.getById(id);
       return mesa
         ? res.json(mesa)
         : res.status(404).json({ message: "Mesa not found" });
@@ -28,10 +31,10 @@ export class MesaController {
     }
   }
 
-  static async save(req, res) {
+  async save(req, res) {
     try {
       const mesaDto = new Mesa(req.body);
-      const newMesa = await MesaService.save(mesaDto);
+      const newMesa = await mesaService.save(mesaDto);
       res.status(201).json(newMesa);
     } catch (error) {
       console.error(pc.red("❌ Error al crear una mesa:"), error.message);
@@ -39,6 +42,6 @@ export class MesaController {
     }
   }
 
-  static async update(req, res) {}
-  static async delete(req, res) {}
+  async update(req, res) {}
+  async delete(req, res) {}
 }

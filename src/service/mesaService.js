@@ -1,21 +1,23 @@
 import { MesaRepository } from "../repository/mesaRepository.js";
 
+const mesaRepository = new MesaRepository();
+
 export class MesaService {
-  static async getAll() {
-    return await MesaRepository.getAll();
+  async getAll() {
+    return await mesaRepository.getAll();
   }
 
-  static async getById(id) {
-    return await MesaRepository.getById(id);
+  async getById(id) {
+    return await mesaRepository.getById(id);
   }
 
-  static async save(mesa) {
-    return await MesaRepository.save(mesa);
+  async save(mesa) {
+    return await mesaRepository.save(mesa);
   }
 
-  static async delete(id) {
-    return await MesaRepository.delete(id);
+  async delete(id) {
+    return await mesaRepository.delete(id);
   }
 
-  static async update() {}
+  async update() {}
 }
