@@ -1,4 +1,5 @@
 import { ReservaRepository } from "../repository/reservaRepository.js";
+import { enviarCorreoConfirmacion } from "./emailService.js";
 
 export class ReservaService {
   static async getAll() {
@@ -10,6 +11,7 @@ export class ReservaService {
   }
 
   static async save(reserva) {
+    await enviarCorreoConfirmacion(reserva);
     return await ReservaRepository.save(reserva);
   }
 

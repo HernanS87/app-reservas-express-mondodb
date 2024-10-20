@@ -15,7 +15,18 @@ GET http://localhost:1234/reservas/
 GET http://localhost:1234/reservas/67129cb374fd2cd2d0e73107
 
 
+### Crear reserva
+POST http://localhost:1234/reservas
+Content-Type: application/json
 
+{
+  "nombreCliente": "Messi",
+  "email": "emivargasutd@gmail.com",
+  "fecha": "2024-10-17",
+  "hora": "12:00",
+  "cantidadPersonas": 4,
+  "mesa": 1
+}
 ###--------------------- MESAS --------------------
 
 ### CREAR MESAS
@@ -30,3 +41,5 @@ Content-Type: application/json
 ### TRAER MESAS
 GET http://localhost:1234/mesas
 Content-Type: application/json
+
+
