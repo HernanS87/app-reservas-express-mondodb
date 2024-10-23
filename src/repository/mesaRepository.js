@@ -28,10 +28,10 @@ export class MesaRepository {
   }
 
   getMesaDisponiblePorCapacidad(capacidad) {
-    return Mesa.findOne({ capacidad: capacidad, estado: "DISPONIBLE" });
+    return Mesa.findOne({ capacidad, estado: "DISPONIBLE" });
   }
 
-  //Busca la mesa más grande y cercana al valor requerido
+  // Busca la mesa más grande y cercana al valor requerido
   getMesaDisponiblePorCapacidadMayorMasCercana(capacidad) {
     return Mesa.findOne({
       capacidad: { $gte: capacidad, $lte: capacidad + 2 },
@@ -42,7 +42,7 @@ export class MesaRepository {
   cambiarEstadoMesa(mesaIds, estado) {
     return Mesa.updateMany(
       { _id: { $in: mesaIds } }, // Filtrar mesas por ID
-      { $set: { estado: estado } } // Cambiar el estado
+      { $set: { estado } } // Cambiar el estado
     );
   }
 }

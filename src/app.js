@@ -1,3 +1,4 @@
+import "./config/loadEnv.js";
 import express, { json } from "express";
 import { connectDB } from "./config/db.js";
 import { reservaRouter } from "./route/reservaRouter.js";

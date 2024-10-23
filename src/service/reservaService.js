@@ -24,7 +24,7 @@ export class ReservaService {
     // Cambiar el estado de las mesas a 'Ocupado'
     await mesaRepository.cambiarEstadoMesa(newReserva.mesa, "OCUPADA");
 
-    await enviarCorreoConfirmacion(newReserva);
+    enviarCorreoConfirmacion(newReserva); // Eliminamos el await para que no tengamos que esperar a que se haga el envio para responderle al usuario
 
     return newReserva;
   }
@@ -64,7 +64,7 @@ export class ReservaService {
       return [mesaGrandeCercana._id];
     }
 
-    let { personasRestantes, mesasAsignadas } =
+    const { personasRestantes, mesasAsignadas } =
       await this.asignarMesasConMenorCapacidad(cantidadPersonas);
 
     // Si aún quedan personas y no se pueden acomodar, tirar error
@@ -83,7 +83,7 @@ export class ReservaService {
       .filter((mesa) => mesa.capacidad < cantidadPersonas)
       .sort((a, b) => b.capacidad - a.capacidad)[0]; // Ordenar descendente y tomar la más grande
 
-    let mesasAsignadas = [];
+    const mesasAsignadas = [];
     let personasRestantes = cantidadPersonas;
 
     // Si encontramos una mesa pequeña cercana, la asignamos
@@ -99,7 +99,7 @@ export class ReservaService {
     );
     // 4. Si aún quedan personas, combinar mesas más pequeñas disponibles
     if (personasRestantes > 0) {
-      for (let mesa of mesasDisponiblesMenorCantPers) {
+      for (const mesa of mesasDisponiblesMenorCantPers) {
         if (personasRestantes <= 0) break;
 
         if (mesa.capacidad >= personasRestantes) {
