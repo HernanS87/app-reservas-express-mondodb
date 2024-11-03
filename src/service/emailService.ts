@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { ReservaType } from "../model/reserva";
 
 // Configuración del transporte
 const transporter = nodemailer.createTransport({
@@ -11,8 +12,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const formatearFecha = (fecha) => {
-  const opciones = {
+const formatearFecha = (fecha: Date) => {
+  const opciones: Intl.DateTimeFormatOptions = {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -21,7 +22,7 @@ const formatearFecha = (fecha) => {
   return new Intl.DateTimeFormat("es-AR", opciones).format(fecha);
 };
 
-export async function enviarCorreoConfirmacion(reserva) {
+export async function enviarCorreoConfirmacion(reserva: ReservaType) {
   const { email, cantidadPersonas, fecha, hora, nombreCliente } = reserva;
 
   const fechaFormateada = formatearFecha(fecha);
@@ -43,7 +44,7 @@ export async function enviarCorreoConfirmacion(reserva) {
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
     console.log("Correo enviado correctamente");
   } catch (error) {
     console.error("Error al enviar el correo: ", error);

@@ -9,7 +9,7 @@ export const connectDB = async () => {
   try {
     await mongoose.connect(connectionString);
     console.log("Conectado a la base de datos");
-  } catch (error) {
+  } catch (error: any) {
     console.error(pc.red("❌ Error de conexión:"), error.message);
     process.exit(1); // Salir del proceso si la conexión falla
   }

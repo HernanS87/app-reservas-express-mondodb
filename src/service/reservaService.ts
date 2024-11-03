@@ -1,6 +1,8 @@
-import { MesaRepository } from "../repository/mesaRepository.js";
-import { ReservaRepository } from "../repository/reservaRepository.js";
-import { enviarCorreoConfirmacion } from "./emailService.js";
+import { HydratedDocument, Types } from "mongoose";
+import { ReservaType } from "../model/reserva";
+import { MesaRepository } from "../repository/mesaRepository";
+import { ReservaRepository } from "../repository/reservaRepository";
+import { enviarCorreoConfirmacion } from "./emailService";
 
 const reservaRepository = new ReservaRepository();
 const mesaRepository = new MesaRepository();
@@ -8,15 +10,15 @@ const mesaRepository = new MesaRepository();
 export class ReservaService {
   // ------------------------- CRUD ----------------------------------
 
-  async getAll() {
+  async getAll(): Promise<HydratedDocument<ReservaType>[]> {
     return await reservaRepository.getAll();
   }
 
-  async getById(id) {
+  async getById(id: string): Promise<HydratedDocument<ReservaType> | null> {
     return await reservaRepository.getById(id);
   }
 
-  async save(reserva) {
+  async save(reserva: ReservaType): Promise<HydratedDocument<ReservaType>> {
     reserva.mesa = await this.asignarMesas(reserva.cantidadPersonas);
 
     const newReserva = await reservaRepository.save(reserva);
@@ -29,7 +31,7 @@ export class ReservaService {
     return newReserva;
   }
 
-  async delete(id) {
+  async delete(id: string): Promise<HydratedDocument<ReservaType> | null> {
     const reservaDeleted = await reservaRepository.delete(id);
 
     if (reservaDeleted) {
@@ -44,7 +46,7 @@ export class ReservaService {
 
   // ------------------------- OTROS ----------------------------------
 
-  async asignarMesas(cantidadPersonas) {
+  private async asignarMesas(cantidadPersonas: number): Promise<Types.ObjectId[]>{
     // 1. Buscar si hay una mesa con capacidad exacta
     const mesaExacta = await mesaRepository.getMesaDisponiblePorCapacidad(
       cantidadPersonas
@@ -75,7 +77,7 @@ export class ReservaService {
     return mesasAsignadas;
   }
 
-  async asignarMesasConMenorCapacidad(cantidadPersonas) {
+  private async asignarMesasConMenorCapacidad(cantidadPersonas: number): Promise<{personasRestantes: number, mesasAsignadas: Types.ObjectId[]}> {
     const mesasDisponibles = await mesaRepository.getMesasDisponibles();
 
     // 3. Buscar la mesa más pequeña cercana (capacidad < cantidadPersonas, pero la más grande posible)

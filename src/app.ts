@@ -1,8 +1,8 @@
-import "./config/loadEnv.js";
+import "./config/loadEnv";
 import express, { json } from "express";
-import { connectDB } from "./config/db.js";
-import { reservaRouter } from "./route/reservaRouter.js";
-import { mesaRouter } from "./route/mesaRouter.js";
+import { connectDB } from "./config/db";
+import { reservaRouter } from "./route/reservaRouter";
+import { mesaRouter } from "./route/mesaRouter";
 
 const app = express();
 app.use(json());
@@ -10,7 +10,7 @@ app.disable("x-powered-by");
 
 connectDB();
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.json({ mensaje: "Reserve su lugar en Restaurando Mario!!" });
 });
 

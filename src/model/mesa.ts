@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, InferSchemaType } from "mongoose";
 
 const mesaSchema = new Schema({
   numero: {
@@ -25,19 +25,22 @@ const mesaSchema = new Schema({
 mesaSchema.pre("save", async function (next) {
   if (this.isNew && !this.numero) {
     // Buscar la mesa con el número más alto
-    const lastMesa = await this.constructor.findOne().sort({ numero: -1 });
+    const lastMesa = await Mesa.findOne().sort({ numero: -1 });
 
-    this.numero = lastMesa ? lastMesa.numero + 1 : 1;
+    this.numero = (lastMesa?.numero ?? 0) + 1;
   }
   next();
 });
 
 mesaSchema.set("toJSON", {
-  transform: (document, returnedObject) => {
+  transform: (_document, returnedObject) => {
     returnedObject.id = returnedObject._id;
     delete returnedObject._id;
     delete returnedObject.__v;
   },
 });
 
-export const Mesa = model("Mesa", mesaSchema);
+// Inferir el tipo a partir del esquema
+export type MesaType = InferSchemaType<typeof mesaSchema>;
+
+export const Mesa = model<MesaType>("Mesa", mesaSchema);

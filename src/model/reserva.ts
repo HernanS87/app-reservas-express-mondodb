@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { InferSchemaType, Schema, model } from "mongoose";
 
 const reservaSchema = new Schema({
   nombreCliente: {
@@ -9,11 +9,11 @@ const reservaSchema = new Schema({
     type: String,
     required: true,
     validate: {
-      validator: function (v) {
+      validator: function (v: string) {
         // Expresión regular para validar formato de email
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
       },
-      message: (props) => `${props.value} no es un email válido!`,
+      message: (props: any) => `${props.value} no es un email válido!`,
     },
   },
   cantidadPersonas: {
@@ -30,10 +30,10 @@ const reservaSchema = new Schema({
     type: String,
     required: true,
     validate: {
-      validator: function (v) {
+      validator: function (v: string) {
         return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v); // Asegura formato "HH:MM"
       },
-      message: (props) => `${props.value} no es un formato de hora válido!`,
+      message: (props: any) => `${props.value} no es un formato de hora válido!`,
     },
   },
   estado: {
@@ -52,11 +52,13 @@ const reservaSchema = new Schema({
 reservaSchema.index({ fecha: -1, hora: 1 }); // Un índice compuesto mejora el rendimiento de las consultas que filtran por ambos campos o al menos por el primer campo (fecha en este caso)
 
 reservaSchema.set("toJSON", {
-  transform: (document, returnedObject) => {
+  transform: (_document, returnedObject) => {
     returnedObject.id = returnedObject._id;
     delete returnedObject._id;
     delete returnedObject.__v;
   },
 });
 
-export const Reserva = model("Reserva", reservaSchema);
+export type ReservaType = InferSchemaType<typeof reservaSchema>;
+
+export const Reserva = model<ReservaType>("Reserva", reservaSchema);
