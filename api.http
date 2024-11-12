@@ -17,7 +17,7 @@ GET http://localhost:1234/reservas/67129cb374fd2cd2d0e73107
 
 ### Eliminar reserva
 
-DELETE http://localhost:1234/reservas/6715850526d91dcb368c1646
+DELETE http://localhost:1234/reservas/6718475f28bdd292f4fdbc8c
 
 
 ### Crear reserva
@@ -25,12 +25,12 @@ POST http://localhost:1234/reservas
 Content-Type: application/json
 
 {
-  "nombreCliente": "Hernan Santarelli",
+  "nombreCliente": "ALEJANDRO SANTA",
   "email": "hernansantarelli87@gmail.com",
-  "fecha": "2024-10-17",
-  "hora": "12:00",
-  "cantidadPersonas": 7,
-  "estado": "CONFIRMADA"
+  "fecha": "2024-11-13T03:00:00.000Z",
+  "turno": "cena",
+  "hora": "22:00",
+  "cantidadPersonas": 10
 }
 
 
@@ -47,5 +47,17 @@ Content-Type: application/json
 }
 
 ### TRAER MESAS
-GET http://localhost:1234/mesas/6715848826d91dcb368c163f
+GET http://localhost:1234/mesas
+Content-Type: application/json
+
+
+### TRAER MESA POR ID
+### "6727e02684ec31264e7ada26","6727e00c84ec31264e7ada17"
+GET http://localhost:1234/mesas/6727e00c84ec31264e7ada17
+Content-Type: application/json
+
+
+
+###--------------------- dias disponibles --------------------
+GET http://localhost:1234/calendario/dias?turno=cena&personas=10
 Content-Type: application/json

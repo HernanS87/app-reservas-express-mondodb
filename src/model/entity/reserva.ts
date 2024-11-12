@@ -1,4 +1,5 @@
 import { InferSchemaType, Schema, model } from "mongoose";
+import { TipoTurno } from "../../enum/tipoTurnoEnum";
 
 const reservaSchema = new Schema({
   nombreCliente: {
@@ -16,15 +17,24 @@ const reservaSchema = new Schema({
       message: (props: any) => `${props.value} no es un email válido!`,
     },
   },
+  turno: {
+    type: String,
+    enum: TipoTurno,
+    required: true,
+  },
   cantidadPersonas: {
     type: Number,
     required: true,
     min: [1, "Debe haber al menos 1 persona."], // Mínimo 1 persona
-    max: [12, "No puede haber más de 12 personas."], // Máximo 12 personas
+    max: [10, "No puede haber más de 10 personas."], // Máximo 10 personas
   },
   fecha: {
     type: Date,
     required: true,
+  },
+  fechaBaja: {
+    type: Date,
+    default: null,
   },
   hora: {
     type: String,
@@ -38,7 +48,7 @@ const reservaSchema = new Schema({
   },
   estado: {
     type: String,
-    enum: ["CONFIRMADA", "CANCELADA"],
+    enum: ["CONFIRMADA", "CANCELADA", "FINALIZADA"], // El estado FINALIZADA indica que asistieron al restaurante y ya liberaron la mesa
     required: true,
   },
   mesa: [
@@ -59,6 +69,6 @@ reservaSchema.set("toJSON", {
   },
 });
 
-export type ReservaType = InferSchemaType<typeof reservaSchema>;
+export type ReservaModelType = InferSchemaType<typeof reservaSchema>;
 
-export const Reserva = model<ReservaType>("Reserva", reservaSchema);
+export const Reserva = model<ReservaModelType>("Reserva", reservaSchema);

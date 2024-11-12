@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { ReservaType } from "../model/reserva";
+import { ReservaModelType } from "../model/entity/reserva";
 
 // Configuración del transporte
 const transporter = nodemailer.createTransport({
@@ -22,7 +22,7 @@ const formatearFecha = (fecha: Date) => {
   return new Intl.DateTimeFormat("es-AR", opciones).format(fecha);
 };
 
-export async function enviarCorreoConfirmacion(reserva: ReservaType) {
+export async function enviarCorreoConfirmacion(reserva: ReservaModelType) {
   const { email, cantidadPersonas, fecha, hora, nombreCliente } = reserva;
 
   const fechaFormateada = formatearFecha(fecha);

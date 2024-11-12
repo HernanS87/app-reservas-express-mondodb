@@ -1,8 +1,8 @@
 import { HydratedDocument, Types } from "mongoose";
-import { ReservaType } from "../model/reserva";
+import { Reserva, ReservaModelType } from "../model/entity/reserva";
 import { MesaRepository } from "../repository/mesaRepository";
 import { ReservaRepository } from "../repository/reservaRepository";
-import { enviarCorreoConfirmacion } from "./emailService";
+// import { enviarCorreoConfirmacion } from "./emailService";
 
 const reservaRepository = new ReservaRepository();
 const mesaRepository = new MesaRepository();
@@ -10,34 +10,38 @@ const mesaRepository = new MesaRepository();
 export class ReservaService {
   // ------------------------- CRUD ----------------------------------
 
-  async getAll(): Promise<HydratedDocument<ReservaType>[]> {
+  async getAll(): Promise<HydratedDocument<ReservaModelType>[]> {
     return await reservaRepository.getAll();
   }
 
-  async getById(id: string): Promise<HydratedDocument<ReservaType> | null> {
+  async getById(
+    id: string
+  ): Promise<HydratedDocument<ReservaModelType> | null> {
     return await reservaRepository.getById(id);
   }
 
-  async save(reserva: ReservaType): Promise<HydratedDocument<ReservaType>> {
+  async save(
+    reserva: ReservaModelType
+  ): Promise<HydratedDocument<ReservaModelType>> {
+    // por ahora el de reserva va a buscar mesa independientemente el turno.
+    //Pero mas adelante hay que validar para que busque reservas para ese dia, turno y hora y asi obtener las mesas q no estan disponibles
     reserva.mesa = await this.asignarMesas(reserva.cantidadPersonas);
+    reserva.estado = "CONFIRMADA";
+    const nr = new Reserva(reserva);
+    const newReserva = await reservaRepository.save(nr);
 
-    const newReserva = await reservaRepository.save(reserva);
-
-    // Cambiar el estado de las mesas a 'Ocupado'
-    await mesaRepository.cambiarEstadoMesa(newReserva.mesa, "OCUPADA");
-
-    enviarCorreoConfirmacion(newReserva); // Eliminamos el await para que no tengamos que esperar a que se haga el envio para responderle al usuario
+    //enviarCorreoConfirmacion(newReserva); // Eliminamos el await para que no tengamos que esperar a que se haga el envio para responderle al usuario
 
     return newReserva;
   }
 
-  async delete(id: string): Promise<HydratedDocument<ReservaType> | null> {
+  async delete(id: string): Promise<HydratedDocument<ReservaModelType> | null> {
     const reservaDeleted = await reservaRepository.delete(id);
 
-    if (reservaDeleted) {
-      console.log("RESERVA ELIMINADA", reservaDeleted);
-      await mesaRepository.cambiarEstadoMesa(reservaDeleted.mesa, "DISPONIBLE");
-    }
+    // if (reservaDeleted) {
+    //   console.log("RESERVA ELIMINADA", reservaDeleted);
+    //   await mesaRepository.cambiarEstadoMesa(reservaDeleted.mesa, "DISPONIBLE");
+    // }
 
     return reservaDeleted;
   }
@@ -46,10 +50,26 @@ export class ReservaService {
 
   // ------------------------- OTROS ----------------------------------
 
-  private async asignarMesas(cantidadPersonas: number): Promise<Types.ObjectId[]>{
+  async getReservasByPeriodoAndTurno(
+    fechaInicio: Date,
+    fechaFin: Date,
+    turno: string
+  ): Promise<HydratedDocument<ReservaModelType>[]> {
+    return reservaRepository.getReservasByPeriodoAndTurno(
+      fechaInicio,
+      fechaFin,
+      turno
+    );
+  }
+
+  public async asignarMesas(
+    cantidadPersonas: number,
+    mesasNoDisponiblesId: Types.ObjectId[] = []
+  ): Promise<Types.ObjectId[]> {
     // 1. Buscar si hay una mesa con capacidad exacta
     const mesaExacta = await mesaRepository.getMesaDisponiblePorCapacidad(
-      cantidadPersonas
+      cantidadPersonas,
+      mesasNoDisponiblesId
     );
 
     if (mesaExacta) {
@@ -59,7 +79,8 @@ export class ReservaService {
     // 2. Busca la mesa más grande y cercana a la cantidad de personas
     const mesaGrandeCercana =
       await mesaRepository.getMesaDisponiblePorCapacidadMayorMasCercana(
-        cantidadPersonas
+        cantidadPersonas,
+        mesasNoDisponiblesId
       );
 
     if (mesaGrandeCercana) {
@@ -67,18 +88,26 @@ export class ReservaService {
     }
 
     const { personasRestantes, mesasAsignadas } =
-      await this.asignarMesasConMenorCapacidad(cantidadPersonas);
+      await this.asignarMesasConMenorCapacidad(
+        cantidadPersonas,
+        mesasNoDisponiblesId
+      );
 
     // Si aún quedan personas y no se pueden acomodar, tirar error
     if (personasRestantes > 0) {
-      throw new Error("No hay suficientes mesas disponibles para esta reserva");
+      throw new Error("No hay suficientes mesas disponibles para esta reserva"); //TODO chequear si es conveniente majerlo asi o simplemente devolver un array vacío
     }
 
     return mesasAsignadas;
   }
 
-  private async asignarMesasConMenorCapacidad(cantidadPersonas: number): Promise<{personasRestantes: number, mesasAsignadas: Types.ObjectId[]}> {
-    const mesasDisponibles = await mesaRepository.getMesasDisponibles();
+  private async asignarMesasConMenorCapacidad(
+    cantidadPersonas: number,
+    mesasNoDisponiblesId: Types.ObjectId[] = []
+  ): Promise<{ personasRestantes: number; mesasAsignadas: Types.ObjectId[] }> {
+    const mesasDisponibles = await mesaRepository.getMesasDisponibles(
+      mesasNoDisponiblesId
+    );
 
     // 3. Buscar la mesa más pequeña cercana (capacidad < cantidadPersonas, pero la más grande posible)
     const mesaPequeñaCercana = mesasDisponibles

@@ -1,23 +1,23 @@
 import { MesaRepository } from "../repository/mesaRepository";
-import { MesaType } from '../model/mesa';
+import { MesaModelType } from '../model/entity/mesa';
 import { HydratedDocument } from "mongoose";
 
 const mesaRepository = new MesaRepository();
 
 export class MesaService {
-  async getAll(): Promise<HydratedDocument<MesaType>[]> {
+  async getAll(): Promise<HydratedDocument<MesaModelType>[]> {
     return await mesaRepository.getAll();
   }
 
-  async getById(id: string): Promise<HydratedDocument<MesaType> | null> {
+  async getById(id: string): Promise<HydratedDocument<MesaModelType> | null> {
     return await mesaRepository.getById(id);
   }
 
-  async save(mesa: MesaType): Promise<HydratedDocument<MesaType>> {
+  async save(mesa: MesaModelType): Promise<HydratedDocument<MesaModelType>> {
     return await mesaRepository.save(mesa);
   }
 
-  async delete(id: string): Promise<HydratedDocument<MesaType> | null> {
+  async delete(id: string): Promise<HydratedDocument<MesaModelType> | null> {
     return await mesaRepository.delete(id);
   }
 

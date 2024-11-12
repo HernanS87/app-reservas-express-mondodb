@@ -1,39 +1,46 @@
 import { HydratedDocument } from "mongoose";
-import { Reserva, ReservaType } from "../model/reserva";
+import { Reserva, ReservaModelType } from "../model/entity/reserva";
 
 export class ReservaRepository  {
   
-  getAll(): Promise<HydratedDocument<ReservaType>[]> {
+  getAll(): Promise<HydratedDocument<ReservaModelType>[]> {
     return Reserva.find().exec();
     // return Reserva.find().populate("mesa"); // Esto reemplaza el ObjectId por el objeto completo de la colección "Mesa"
   }
 
-  getById(id: string): Promise<HydratedDocument<ReservaType> | null> {
+  getById(id: string): Promise<HydratedDocument<ReservaModelType> | null> {
     return Reserva.findById(id).exec(); 
   }
 
-  save(reservaDto: ReservaType): Promise<HydratedDocument<ReservaType>> {
+  save(reservaDto: ReservaModelType): Promise<HydratedDocument<ReservaModelType>> {
     const newReserva = new Reserva(reservaDto);
     return newReserva.save();
   }
 
-  delete(id: string): Promise<HydratedDocument<ReservaType> | null> {
+  delete(id: string): Promise<HydratedDocument<ReservaModelType> | null> {
     return Reserva.findByIdAndDelete(id).exec();
   }
 
-  update(id: string, updateData: Partial<ReservaType>): Promise<HydratedDocument<ReservaType> | null> {
+  update(id: string, updateData: Partial<ReservaModelType>): Promise<HydratedDocument<ReservaModelType> | null> {
     return Reserva.findByIdAndUpdate(id, updateData, { new: true }).exec();
+  }
+
+  getReservasByPeriodoAndTurno(fechaInicio: Date, fechaFin: Date, turno: string): Promise<HydratedDocument<ReservaModelType>[]>{
+    return Reserva.find({
+      fecha: { $gte: fechaInicio, $lte: fechaFin },
+      turno
+    });
   }
   
 }
 
 
 // ------------ ¿Por qué usamos HydratedDocument? -------------
-// Utilizamos `HydratedDocument<ReservaType>` como tipo de retorno para representar instancias completas de documentos Mongoose.
-// `HydratedDocument` es un tipo proporcionado por Mongoose que extiende `ReservaType` y añade propiedades y métodos
+// Utilizamos `HydratedDocument<ReservaModelType>` como tipo de retorno para representar instancias completas de documentos Mongoose.
+// `HydratedDocument` es un tipo proporcionado por Mongoose que extiende `ReservaModelType` y añade propiedades y métodos
 // específicos de Mongoose, como `save`, `populate`, y `_id`, permitiendo que los documentos tengan funcionalidades
 // adicionales para la manipulación de datos en la base de datos. Esto es útil cuando necesitamos acceder a estos
-// métodos en capas superiores, manteniendo la estructura y los datos definidos en `ReservaType`.
+// métodos en capas superiores, manteniendo la estructura y los datos definidos en `ReservaModelType`.
 
 
 // ------------ ¿Por qué usamos exec()? -------------

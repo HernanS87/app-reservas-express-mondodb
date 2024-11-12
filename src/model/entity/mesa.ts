@@ -10,11 +10,6 @@ const mesaSchema = new Schema({
     enum: [2, 4, 6, 10],
     required: true,
   },
-  estado: {
-    type: String,
-    enum: ["OCUPADA", "DISPONIBLE"],
-    required: true,
-  },
   fechaBaja: {
     type: Date,
     default: null,
@@ -41,6 +36,6 @@ mesaSchema.set("toJSON", {
 });
 
 // Inferir el tipo a partir del esquema
-export type MesaType = InferSchemaType<typeof mesaSchema>;
+export type MesaModelType = InferSchemaType<typeof mesaSchema>;
 
-export const Mesa = model<MesaType>("Mesa", mesaSchema);
+export const Mesa = model<MesaModelType>("Mesa", mesaSchema);
