@@ -3,7 +3,6 @@ import { HorasAlmuerzo } from "../../enum/horasAlmuerzoEnum";
 import { HorasCena } from "../../enum/horasCenaEnum";
 import { TipoDisponibilidad } from "../../enum/tipoDisponibilidadEnum";
 
-
 export interface IDisponibilidadDia {
   fecha: Date;
   disponible: boolean;
@@ -21,10 +20,7 @@ export interface IDisponibilidadDiaHorarios extends IDisponibilidadDia {
   horarios?: IHorarios[];
 }
 
-export interface IMesasOcupadasPorHorario {
+export interface IMesasOcupadasPorTurnoYHorario {
   hora: string;
   mesasOcupadasId: Types.ObjectId[];
 }
-
-
-

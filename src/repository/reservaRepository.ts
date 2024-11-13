@@ -31,6 +31,10 @@ export class ReservaRepository  {
       turno
     });
   }
+
+  getReservasByFechaAndTurno(fecha: Date, turno: string): Promise<HydratedDocument<ReservaModelType>[]>{
+      return Reserva.find({fecha, turno});
+  }
   
 }
 

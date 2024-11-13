@@ -1,26 +1,19 @@
 import { HydratedDocument } from "mongoose";
-import { HorasCena } from "../enum/horasCenaEnum";
 import { TipoDisponibilidad } from "../enum/tipoDisponibilidadEnum";
 import { ReservaModelType } from "../model/entity/reserva";
 import {
   IDisponibilidadDia,
-  IMesasOcupadasPorHorario,
+  IMesasOcupadasPorTurnoYHorario,
 } from "../model/interface/calendarioInterface";
-import {
-  endOfDay,
-  obtenerDiaSemanaEnum,
-  startOfDay,
-  sumarORestarMinutos,
-} from "../util/dateUtil";
+import { endOfDay, obtenerDiaSemanaEnum, startOfDay } from "../util/dateUtil";
 import { ReservaService } from "./reservaService";
-import { getTipoTurno, TipoTurno } from "../enum/tipoTurnoEnum";
-import { HorasAlmuerzo } from "../enum/horasAlmuerzoEnum";
 import { DiaSemana } from "../enum/diaSemanaEnum";
+import { MesaService } from "./mesaService";
 
 const reservaService = new ReservaService();
+const mesaService = new MesaService();
 
 export class CalendarioService {
-
   async getDisponibilidadDias(
     turno: string,
     personas: number
@@ -73,11 +66,14 @@ export class CalendarioService {
       }
 
       // Si hay reservas. Entonces buscamos las mesas ocupadas por horario
-      const mesasOcupadasPorHorario: IMesasOcupadasPorHorario[] =
-        this.calcularMesasOcupadasPorHorario(turno, reservasDelDia);
+      const mesasOcupadasPorHorario: IMesasOcupadasPorTurnoYHorario[] =
+        mesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas(
+          turno,
+          reservasDelDia
+        );
 
       let isAlgunaMesaDisponible =
-        await this.isAlgunaMesaDisponibleParaCualquierHorarioReserva(
+        await mesaService.isAlgunaMesaDisponibleParaCualquierHorarioReserva(
           personas,
           mesasOcupadasPorHorario
         );
@@ -92,69 +88,5 @@ export class CalendarioService {
     }
 
     return disponibilidadDias;
-  }
-
-  private calcularMesasOcupadasPorHorario(
-    turno: string,
-    reservasDelDia: HydratedDocument<ReservaModelType>[]
-  ) {
-    const mesasOcupadasPorHorario: IMesasOcupadasPorHorario[] = [];
-
-    const horasPorTurno =
-      getTipoTurno(turno) == TipoTurno.CENA ? HorasCena : HorasAlmuerzo;
-
-    Object.values(horasPorTurno).forEach((hora) => {
-      mesasOcupadasPorHorario.push({
-        hora,
-        mesasOcupadasId: [],
-      });
-    });
-
-    reservasDelDia.forEach((reserva) => {
-      const inicioPeriodoIndisponibilidadMesasPorReserva = sumarORestarMinutos(
-        reserva.hora,
-        90,
-        "restar"
-      );
-      const finPeriodoIndisponibilidadMesasPorReserva = sumarORestarMinutos(
-        reserva.hora,
-        90,
-        "sumar"
-      );
-
-      mesasOcupadasPorHorario.forEach((elem) => {
-        if (
-          elem.hora === reserva.hora ||
-          (elem.hora < reserva.hora &&
-            elem.hora > inicioPeriodoIndisponibilidadMesasPorReserva) ||
-          (elem.hora > reserva.hora &&
-            elem.hora < finPeriodoIndisponibilidadMesasPorReserva)
-        ) {
-          elem.mesasOcupadasId.push(...reserva.mesa);
-        }
-      });
-    });
-    return mesasOcupadasPorHorario;
-  }
-
-  private async isAlgunaMesaDisponibleParaCualquierHorarioReserva(
-    personas: number,
-    mesasOcupadasPorHorario: IMesasOcupadasPorHorario[]
-  ): Promise<boolean> {
-    for (const elem of mesasOcupadasPorHorario) {
-      const mesasOcupadasId = [...new Set(elem.mesasOcupadasId)]; // Eliminamos repetidos
-      try {
-        const mesasDisponibles = await reservaService.asignarMesas(
-          personas,
-          mesasOcupadasId
-        );
-        if (mesasDisponibles.length > 0) {
-          return true;
-        }
-      } catch (error) {
-        // No hay mesas disponibles para este horario
-      }
-    }
-    return false;
   }
 }
