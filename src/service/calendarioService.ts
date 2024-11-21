@@ -3,9 +3,17 @@ import { TipoDisponibilidad } from "../enum/tipoDisponibilidadEnum";
 import { ReservaModelType } from "../model/entity/reserva";
 import {
   IDisponibilidadDia,
-  IMesasOcupadasPorTurnoYHorario,
+  IDisponibilidadDiaHorarios,
+  IHorarioMesasOcupadasId,
+  IHorarios,
 } from "../model/interface/calendarioInterface";
-import { endOfDay, obtenerDiaSemanaEnum, startOfDay } from "../util/dateUtil";
+import {
+  endOfDay,
+  obtenerDiaAnterior,
+  obtenerDiaSemanaEnum,
+  obtenerDiaSiguiente,
+  startOfDay,
+} from "../util/dateUtil";
 import { ReservaService } from "./reservaService";
 import { DiaSemana } from "../enum/diaSemanaEnum";
 import { MesaService } from "./mesaService";
@@ -66,7 +74,7 @@ export class CalendarioService {
       }
 
       // Si hay reservas. Entonces buscamos las mesas ocupadas por horario
-      const mesasOcupadasPorHorario: IMesasOcupadasPorTurnoYHorario[] =
+      const horariosMesasOcupadasId: IHorarioMesasOcupadasId[] =
         mesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas(
           turno,
           reservasDelDia
@@ -75,7 +83,7 @@ export class CalendarioService {
       let isAlgunaMesaDisponible =
         await mesaService.isAlgunaMesaDisponibleParaCualquierHorarioReserva(
           personas,
-          mesasOcupadasPorHorario
+          horariosMesasOcupadasId
         );
 
       disponibilidadDias.push({
@@ -88,5 +96,88 @@ export class CalendarioService {
     }
 
     return disponibilidadDias;
+  }
+
+  async getDisponibilidadHorariosFechaDiaAnteriorYPosterior(
+    turno: string,
+    personas: number,
+    fechaTurno: Date
+  ): Promise<IDisponibilidadDiaHorarios[]> {
+    // Obtener fechas
+    const diaAnterior = obtenerDiaAnterior(fechaTurno);
+    const diaSiguiente = obtenerDiaSiguiente(fechaTurno);
+
+    // Ejecutar cálculos en paralelo
+    const [
+      disponibilidadDiaAnterior,
+      disponibilidadFechaTurno,
+      disponibilidadDiaSiguiente,
+    ] = await Promise.all([
+      this.obtenerDisponibilidadDia(turno, personas, diaAnterior),
+      this.obtenerDisponibilidadDia(turno, personas, fechaTurno),
+      this.obtenerDisponibilidadDia(turno, personas, diaSiguiente),
+    ]);
+
+    // Retornar el array de respuestas
+    return [
+      disponibilidadDiaAnterior,
+      disponibilidadFechaTurno,
+      disponibilidadDiaSiguiente,
+    ];
+  }
+
+  private async obtenerDisponibilidadDia(
+    turno: string,
+    personas: number,
+    fecha: Date
+  ): Promise<IDisponibilidadDiaHorarios> {
+    const horariosFecha: IHorarios[] = [];
+
+    if (obtenerDiaSemanaEnum(fecha) === DiaSemana.DOMINGO) {
+      return {
+        fecha,
+        disponible: false,
+        tipo: TipoDisponibilidad.NO_DISPONIBLE_CERRADO,
+        horarios: horariosFecha,
+      };
+    }
+
+    const reservasXFechaYTurno =
+      await reservaService.getReservasByFechaAndTurno(fecha, turno);
+
+    const horariosMesasOcupadasId: IHorarioMesasOcupadasId[] =
+      mesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas(
+        turno,
+        reservasXFechaYTurno
+      );
+
+    await Promise.all(
+      horariosMesasOcupadasId.map(async (horario) => {
+        const mesasDisponibles =
+          await mesaService.buscarMesasDisponiblesPorCantPersonasParaReserva(
+            personas,
+            horario.mesasOcupadasId
+          );
+        horariosFecha.push({
+          hora: horario.hora,
+          disponible: mesasDisponibles.length > 0,
+        });
+      })
+    );
+
+    horariosFecha.sort((a, b) => a.hora.localeCompare(b.hora));
+
+    const isAlgunHorarioDisponible = horariosFecha.some(
+      (horario) => horario.disponible
+    );
+
+    return {
+      fecha,
+      disponible: isAlgunHorarioDisponible,
+      tipo: isAlgunHorarioDisponible
+        ? TipoDisponibilidad.DISPONIBLE
+        : TipoDisponibilidad.NO_DISPONIBLE,
+      horarios: horariosFecha,
+    };
   }
 }
