@@ -13,6 +13,7 @@ const reservaSchema = z.object({
     .max(10, { message: "No puede haber más de 10 personas." }),
   
   // Validación de fecha
+  //Analizar si es mejor esta validacion o la que está en turnoPersonaValidation.ts
   fecha: z.date({
     required_error: "La fecha es obligatoria",
     invalid_type_error: "Debe ser una fecha válida",

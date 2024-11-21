@@ -1,15 +1,34 @@
 import { DiaSemana } from "../enum/diaSemanaEnum";
+import { toZonedTime } from "date-fns-tz";
+import config from "../config/config.json";
+import { startOfDay as dfnsStartOfDay, endOfDay as dfnsEndOfDay, addDays, isValid } from "date-fns";
 
+const RESTAURANT_TIME_ZONE = config.restaurantTimeZone;
+
+/**
+ * Devuelve el inicio del día para una fecha específica.
+ * @param date - Fecha de entrada
+ * @returns Inicio del día (00:00:00.000)
+ * @throws Error si la fecha no es válida.
+ */
 export function startOfDay(date: Date): Date {
-  const start = new Date(date);
-  start.setHours(0, 0, 0, 0); // Establecer a las 00:00:00.000
-  return start;
+  if (!isValid(date)) {
+    throw new Error('La fecha proporcionada no es válida.');
+  }
+  return dfnsStartOfDay(date);
 }
 
+/**
+ * Devuelve el final del día para una fecha específica.
+ * @param date - Fecha de entrada
+ * @returns Final del día (23:59:59.999)
+ * @throws Error si la fecha no es válida.
+ */
 export function endOfDay(date: Date): Date {
-  const end = new Date(date);
-  end.setHours(23, 59, 59, 999); // Establecer a las 23:59:59.999
-  return end;
+  if (!isValid(date)) {
+    throw new Error('La fecha proporcionada no es válida.');
+  }
+  return dfnsEndOfDay(date);
 }
 
 export function obtenerDiaSemanaEnum(fecha: Date): DiaSemana {
@@ -29,4 +48,38 @@ export function sumarORestarMinutos(hora: string, minutos: number, operacion: "s
   const minutosPorOperacion = operacion === "sumar" ? minutos : -minutos;
   fecha.setMinutes(fecha.getMinutes() + minutosPorOperacion);
   return `${fecha.getHours().toString().padStart(2, "0")}:${fecha.getMinutes().toString().padStart(2, "0")}`;
+}
+
+/**
+ * Función para convertir fechas a la zona horaria establecida
+ * @param fecha 
+ * @returns La nueva fecha formateada.
+ */
+export function convertirAFechaLocal(fecha: string): Date {
+  const zonedDate = toZonedTime(fecha, RESTAURANT_TIME_ZONE);
+  return zonedDate;
+}
+
+/**
+ * Devuelve el día siguiente a la fecha proporcionada.
+ * @param fecha - Fecha de entrada (debe ser válida)
+ * @throws Error si la fecha no es válida.
+ */
+export function obtenerDiaSiguiente(fecha: Date): Date {
+  if (!isValid(fecha)) {
+    throw new Error('La fecha proporcionada no es válida.');
+  }
+  return addDays(fecha, 1);
+}
+
+/**
+ * Devuelve el día siguiente a la fecha proporcionada.
+ * @param fecha - Fecha de entrada (debe ser válida)
+ * @throws Error si la fecha no es válida.
+ */
+export function obtenerDiaAnterior(fecha: Date): Date {
+  if (!isValid(fecha)) {
+    throw new Error('La fecha proporcionada no es válida.');
+  }
+  return addDays(fecha, -1);
 }

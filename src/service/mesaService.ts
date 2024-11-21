@@ -2,7 +2,7 @@ import { MesaRepository } from "../repository/mesaRepository";
 import { MesaModelType } from "../model/entity/mesa";
 import { HydratedDocument, Types } from "mongoose";
 import { ReservaModelType } from "../model/entity/reserva";
-import { IMesasOcupadasPorTurnoYHorario } from "../model/interface/calendarioInterface";
+import { IHorarioMesasOcupadasId } from "../model/interface/calendarioInterface";
 import { getTipoTurno, TipoTurno } from "../enum/tipoTurnoEnum";
 import { HorasCena } from "../enum/horasCenaEnum";
 import { HorasAlmuerzo } from "../enum/horasAlmuerzoEnum";
@@ -32,18 +32,8 @@ export class MesaService {
   buscarMesasOcupadasPorTurnoYHorarioEnListaReservas(
     turno: string,
     reservasDelDia: HydratedDocument<ReservaModelType>[]
-  ): IMesasOcupadasPorTurnoYHorario[] {
-    const mesasOcupadasPorHorario: IMesasOcupadasPorTurnoYHorario[] = [];
-
-    const horasPorTurno =
-      getTipoTurno(turno) == TipoTurno.CENA ? HorasCena : HorasAlmuerzo;
-
-    Object.values(horasPorTurno).forEach((hora) => {
-      mesasOcupadasPorHorario.push({
-        hora,
-        mesasOcupadasId: [],
-      });
-    });
+  ): IHorarioMesasOcupadasId[] {
+    const horariosMesasOcupadasId: IHorarioMesasOcupadasId[] = this.obtenerListaHorariosTurno(turno);
 
     reservasDelDia.forEach((reserva) => {
       const inicioPeriodoIndisponibilidadMesasPorReserva = sumarORestarMinutos(
@@ -57,22 +47,36 @@ export class MesaService {
         "sumar"
       );
 
-      mesasOcupadasPorHorario.forEach((elem) => {
+      horariosMesasOcupadasId.forEach((horario) => {
         if (
-          elem.hora === reserva.hora ||
-          (elem.hora < reserva.hora &&
-            elem.hora > inicioPeriodoIndisponibilidadMesasPorReserva) ||
-          (elem.hora > reserva.hora &&
-            elem.hora < finPeriodoIndisponibilidadMesasPorReserva)
+          horario.hora === reserva.hora ||
+          (horario.hora < reserva.hora &&
+            horario.hora > inicioPeriodoIndisponibilidadMesasPorReserva) ||
+          (horario.hora > reserva.hora &&
+            horario.hora < finPeriodoIndisponibilidadMesasPorReserva)
         ) {
-          elem.mesasOcupadasId.push(...reserva.mesa);
+          horario.mesasOcupadasId.push(...reserva.mesa);
         }
       });
     });
-    return mesasOcupadasPorHorario;
+    return horariosMesasOcupadasId;
   }
 
-  public async buscarMesasDisponiblesPorCantPersonas(
+  private obtenerListaHorariosTurno(turno: string) {
+    const horariosMesasOcupadasId: IHorarioMesasOcupadasId[] = [];
+
+    const horasPorTurno = getTipoTurno(turno) == TipoTurno.CENA ? HorasCena : HorasAlmuerzo;
+
+    Object.values(horasPorTurno).forEach((hora) => {
+      horariosMesasOcupadasId.push({
+        hora,
+        mesasOcupadasId: [],
+      });
+    });
+    return horariosMesasOcupadasId;
+  }
+
+  public async buscarMesasDisponiblesPorCantPersonasParaReserva(
     cantidadPersonas: number,
     mesasNoDisponiblesId: Types.ObjectId[]
   ): Promise<Types.ObjectId[]> {
@@ -103,9 +107,9 @@ export class MesaService {
         mesasNoDisponiblesId
       );
 
-    // Si aún quedan personas y no se pueden acomodar, tirar error
+    // Si aún quedan personas y no se pueden acomodar, devolvemos un array vacío para indicar que no pudimos encontrar mesas para la reserva
     if (personasRestantes > 0) {
-      throw new Error("No hay suficientes mesas disponibles para esta reserva"); //TODO chequear si es conveniente majerlo asi o simplemente devolver un array vacío
+      mesasAsignadas.splice(0, mesasAsignadas.length);
     }
 
     return mesasAsignadas;
@@ -160,13 +164,13 @@ export class MesaService {
 
   async isAlgunaMesaDisponibleParaCualquierHorarioReserva(
     personas: number,
-    mesasOcupadasPorHorario: IMesasOcupadasPorTurnoYHorario[]
+    horariosMesasOcupadasId: IHorarioMesasOcupadasId[]
   ): Promise<boolean> {
-    for (const elem of mesasOcupadasPorHorario) {
-      const mesasOcupadasId = [...new Set(elem.mesasOcupadasId)]; // Eliminamos repetidos
+    for (const horario of horariosMesasOcupadasId) {
+      const mesasOcupadasId = [...new Set(horario.mesasOcupadasId)]; // Eliminamos repetidos
       try {
         const mesasDisponibles =
-          await this.buscarMesasDisponiblesPorCantPersonas(
+          await this.buscarMesasDisponiblesPorCantPersonasParaReserva(
             personas,
             mesasOcupadasId
           );
@@ -174,7 +178,7 @@ export class MesaService {
           return true;
         }
       } catch (error) {
-        // No hay mesas disponibles para este horario
+        console.error(error);
       }
     }
     return false;

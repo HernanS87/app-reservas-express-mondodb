@@ -23,13 +23,19 @@ export class ReservaService {
   async save(
     reserva: ReservaModelType
   ): Promise<HydratedDocument<ReservaModelType>> {
-    reserva.mesa =
+    const mesas =
       await this.obtenerMesasDisponiblesPorFechaTurnoHorarioYCantPersonas(
         reserva.fecha,
         reserva.turno,
         reserva.hora,
         reserva.cantidadPersonas
       );
+
+    if (mesas.length == 0) {
+      throw new Error("No hay suficientes mesas disponibles para esta reserva");
+    }
+
+    reserva.mesa = mesas;
     reserva.estado = "CONFIRMADA";
     const nr = new Reserva(reserva);
     const newReserva = await reservaRepository.save(nr);
@@ -84,17 +90,17 @@ export class ReservaService {
       turno
     );
 
-    const mesasOcupadasPorHorariosTurno =
+    const horariosMesasOcupadasId =
       mesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas(
         turno,
         reservasXFechaYTurno
       );
 
     const mesasNoDisponiblesIdPorHorarioSeleccionado =
-      mesasOcupadasPorHorariosTurno.find((elem) => elem.hora === horario)
+    horariosMesasOcupadasId.find((elem) => elem.hora === horario)
         ?.mesasOcupadasId || [];
 
-    return await mesaService.buscarMesasDisponiblesPorCantPersonas(
+    return await mesaService.buscarMesasDisponiblesPorCantPersonasParaReserva(
       personas,
       mesasNoDisponiblesIdPorHorarioSeleccionado
     );

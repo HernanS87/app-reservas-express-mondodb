@@ -12,15 +12,15 @@ export interface IDisponibilidadDia {
 type HorasAlmuerzoCena = HorasAlmuerzo | HorasCena;
 
 export interface IHorarios {
-  hora: HorasAlmuerzoCena;
+  hora: HorasAlmuerzoCena | string; //ver que hacer con este tipado
   disponible: boolean;
 }
 
 export interface IDisponibilidadDiaHorarios extends IDisponibilidadDia {
-  horarios?: IHorarios[];
+  horarios: IHorarios[];
 }
 
-export interface IMesasOcupadasPorTurnoYHorario {
+export interface IHorarioMesasOcupadasId {
   hora: string;
   mesasOcupadasId: Types.ObjectId[];
 }

@@ -42,7 +42,7 @@ POST http://localhost:1234/mesas
 Content-Type: application/json
 
 {
-  "capacidad": 2,
+  "capacidad": 6,
   "estado": "DISPONIBLE"
 }
 
@@ -60,4 +60,10 @@ Content-Type: application/json
 
 ###--------------------- dias disponibles --------------------
 GET http://localhost:1234/calendario/dias?turno=cena&personas=3
+Content-Type: application/json
+
+### /dias/:fecha/horarios
+
+###--------------------- horarios x fecha --------------------
+GET http://localhost:1234/calendario/dias/2024-11-23/horarios?turno=almuerzo&personas=8
 Content-Type: application/json
