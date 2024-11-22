@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { ReservaService } from "../service/reservaService";
 import pc from "picocolors";
+import { ValidacionService } from "../service/validacionService";
 
 const reservaService = new ReservaService();
+const validacionService = new ValidacionService();
 
 export class ReservaController {
   async getAll(_req: Request, res: Response): Promise<Response> {
@@ -20,26 +22,31 @@ export class ReservaController {
       //validar id
       const { id } = req.params;
       const reserva = await reservaService.getById(id);
-      return reserva
-        ? res.json(reserva)
-        : res.status(404).json({ message: "Reserva not found" });
+      return reserva ? res.json(reserva) : res.status(404).json({ message: "Reserva not found" });
     } catch (error: any) {
-      console.error(
-        pc.red("❌ Error al buscar una reserva por id:"),
-        error.message
-      );
+      console.error(pc.red("❌ Error al buscar una reserva por id:"), error.message);
       return res.status(500).json({ message: error.message });
     }
   }
 
   async save(req: Request, res: Response): Promise<Response> {
     try {
-      // deberia validar el body y despues continuar
-      const newReserva = await reservaService.save(req.body);
-      return res.status(201).json(newReserva);
+      const reservaValidada = await validacionService.validarYPrepararReserva(req.body);
+      const respuesta = await reservaService.save(reservaValidada);
+      return res.status(201).json(respuesta);
     } catch (error: any) {
-      console.error(pc.red("❌ Error al crear una reserva:"), error.message);
-      return res.status(500).json({ message: error.message });
+      console.error("❌ Error al crear una reserva:", error.message);
+
+      // Verifica si el error tiene la propiedad 'errors' (indicando un error de validación)
+      if (error.errors) {
+        return res.status(400).json({
+          message: "Errores de validación",
+          errors: error.errors, // Devuelve los errores directamente
+        });
+      }
+
+      // Maneja otros errores
+      return res.status(500).json({ message: "Error interno del servidor" });
     }
   }
 
@@ -50,14 +57,9 @@ export class ReservaController {
       //validar id
       const { id } = req.params;
       const reserva = await reservaService.delete(id);
-      return reserva
-        ? res.json({ message: "Se eliminó la reserva con éxito!!" })
-        : res.status(404).json({ message: "Reserva not found" });
+      return reserva ? res.json({ message: "Se eliminó la reserva con éxito!!" }) : res.status(404).json({ message: "Reserva not found" });
     } catch (error: any) {
-      console.error(
-        pc.red("❌ Error al buscar una reserva para eliminar por id:"),
-        error.message
-      );
+      console.error(pc.red("❌ Error al buscar una reserva para eliminar por id:"), error.message);
       return res.status(500).json({ message: error.message });
     }
   }
