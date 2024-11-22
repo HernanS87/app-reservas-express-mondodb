@@ -31,7 +31,7 @@ export class ReservaController {
 
   async save(req: Request, res: Response): Promise<Response> {
     try {
-      const reservaValidada = await validacionService.validarYPrepararReserva(req.body);
+      const reservaValidada = await validacionService.validarRequestAltaReserva(req.body);
       const respuesta = await reservaService.save(reservaValidada);
       return res.status(201).json(respuesta);
     } catch (error: any) {

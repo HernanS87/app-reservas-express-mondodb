@@ -1,78 +1,53 @@
 import { Request, Response } from "express";
 import pc from "picocolors";
 import { CalendarioService } from "../service/calendarioService";
-import {
-  validateTurnoPersonas,
-  validateTurnoPersonasFecha,
-} from "../model/validation/calendarioValidation";
-import { convertirAFechaLocal } from "../util/dateUtil";
+import { ValidacionService } from "../service/validacionService";
 
 const calendarioService = new CalendarioService();
+const validacionService = new ValidacionService();
 
 export class CalendarioController {
   async getDisponibilidadDias(req: Request, res: Response): Promise<Response> {
     try {
-      const turno = req.query.turno as string;
-      const personas = req.query.personas as string;
+      const requestValida = await validacionService.validarRequestDisponibilidadDias(req.query);
 
-      const validate = await validateTurnoPersonas({ turno, personas });
-      if (!validate.success) {
-        // Si la validación falla, devolver un error 400 con los errores
+      const infoDias = await calendarioService.getDisponibilidadDias(requestValida);
+      return res.json(infoDias);
+    } catch (error: any) {
+      console.error(pc.red("❌ Error al buscar la disponibilidad:"), error.message);
+      // Verifica si el error tiene la propiedad 'errors' (indicando un error de validación)
+      if (error.errors) {
         return res.status(400).json({
           message: "Errores de validación",
-          errors: validate.error.errors,
+          errors: error.errors, // Devuelve los errores directamente
         });
       }
 
-      const infoDias = await calendarioService.getDisponibilidadDias(
-        turno,
-        Number(personas)
-      );
-      return res.json(infoDias);
-    } catch (error: any) {
-      console.error(
-        pc.red("❌ Error al buscar la disponibilidad:"),
-        error.message
-      );
-      return res.status(500).json({ message: error.message });
+      // Maneja otros errores
+      return res.status(500).json({ message: "Error interno del servidor" });
     }
   }
 
-  async getDisponibilidadHorariosXFecha(
-    req: Request,
-    res: Response
-  ): Promise<Response> {
+  async getDisponibilidadHorariosXFecha(req: Request, res: Response): Promise<Response> {
     try {
-      const fecha = req.params.fecha as string;
-      const turno = req.query.turno as string;
-      const personas = req.query.personas as string;
-
-      const validate = await validateTurnoPersonasFecha({
-        turno,
-        personas,
-        fecha,
+      const requestValida = await validacionService.validarRequestDisponibilidadHorariosXFecha({
+        ...req.params,
+        ...req.query,
       });
-      if (!validate.success) {
-        // Si la validación falla, devolver un error 400 con los errores
+
+      const horariosFecha = await calendarioService.getDisponibilidadHorariosFechaDiaAnteriorYPosterior(requestValida);
+      return res.json(horariosFecha);
+    } catch (error: any) {
+      console.error(pc.red("❌ Error al buscar la disponibilidad por fecha:"), error.message);
+
+      if (error.errors) {
         return res.status(400).json({
           message: "Errores de validación",
-          errors: validate.error.errors,
+          errors: error.errors,
         });
       }
 
-      const horariosFecha =
-        await calendarioService.getDisponibilidadHorariosFechaDiaAnteriorYPosterior(
-          turno,
-          Number(personas),
-          convertirAFechaLocal(fecha)
-        );
-      return res.json(horariosFecha);
-    } catch (error: any) {
-      console.error(
-        pc.red("❌ Error al buscar la disponibilidad por fecha:"),
-        error.message
-      );
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({ message: "Error interno del servidor" });
     }
   }
 }

@@ -6,14 +6,10 @@ import {
   IDisponibilidadDiaHorarios,
   IHorarioMesasOcupadasId,
   IHorarios,
+  IRequestDisponibilidadDias,
+  IRequestDisponibilidadHorariosXFecha,
 } from "../model/interface/calendarioInterface";
-import {
-  endOfDay,
-  obtenerDiaAnterior,
-  obtenerDiaSemanaEnum,
-  obtenerDiaSiguiente,
-  startOfDay,
-} from "../util/dateUtil";
+import { endOfDay, obtenerDiaAnterior, obtenerDiaSemanaEnum, obtenerDiaSiguiente, startOfDay } from "../util/dateUtil";
 import { ReservaService } from "./reservaService";
 import { DiaSemana } from "../enum/diaSemanaEnum";
 import { MesaService } from "./mesaService";
@@ -22,10 +18,9 @@ const reservaService = new ReservaService();
 const mesaService = new MesaService();
 
 export class CalendarioService {
-  async getDisponibilidadDias(
-    turno: string,
-    personas: number
-  ): Promise<IDisponibilidadDia[]> {
+  async getDisponibilidadDias(params: IRequestDisponibilidadDias): Promise<IDisponibilidadDia[]> {
+    const { turno, personas } = params;
+
     const PERIODO_DIAS = 60;
 
     const fechaInicioPeriodo = startOfDay(new Date());
@@ -33,12 +28,11 @@ export class CalendarioService {
     const fechaFinPeriodo = endOfDay(fechaInicioPeriodo);
     fechaFinPeriodo.setDate(fechaFinPeriodo.getDate() + PERIODO_DIAS);
 
-    const reservasPeriodo: HydratedDocument<ReservaModelType>[] =
-      await reservaService.getReservasByPeriodoAndTurno(
-        fechaInicioPeriodo,
-        fechaFinPeriodo,
-        turno
-      );
+    const reservasPeriodo: HydratedDocument<ReservaModelType>[] = await reservaService.getReservasByPeriodoAndTurno(
+      fechaInicioPeriodo,
+      fechaFinPeriodo,
+      turno
+    );
 
     const disponibilidadDias: IDisponibilidadDia[] = [];
 
@@ -58,9 +52,7 @@ export class CalendarioService {
         continue;
       }
 
-      const reservasDelDia = reservasPeriodo.filter(
-        (reserva) => startOfDay(reserva.fecha).getDate() == dia.getDate()
-      );
+      const reservasDelDia = reservasPeriodo.filter((reserva) => startOfDay(reserva.fecha).getDate() == dia.getDate());
 
       // Si no hay reservas para este dia lo seteamos como disponible
       // Aunque podriamos buscar si hay mesa para la cantidad seleccionada sólo por el motivo que algunas podrian estar dadas de baja. Pero eso lo haremos mas adelante
@@ -74,24 +66,17 @@ export class CalendarioService {
       }
 
       // Si hay reservas. Entonces buscamos las mesas ocupadas por horario
-      const horariosMesasOcupadasId: IHorarioMesasOcupadasId[] =
-        mesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas(
-          turno,
-          reservasDelDia
-        );
+      const horariosMesasOcupadasId: IHorarioMesasOcupadasId[] = mesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas(
+        turno,
+        reservasDelDia
+      );
 
-      let isAlgunaMesaDisponible =
-        await mesaService.isAlgunaMesaDisponibleParaCualquierHorarioReserva(
-          personas,
-          horariosMesasOcupadasId
-        );
+      let isAlgunaMesaDisponible = await mesaService.isAlgunaMesaDisponibleParaCualquierHorarioReserva(personas, horariosMesasOcupadasId);
 
       disponibilidadDias.push({
         fecha: dia,
         disponible: isAlgunaMesaDisponible,
-        tipo: isAlgunaMesaDisponible
-          ? TipoDisponibilidad.DISPONIBLE
-          : TipoDisponibilidad.NO_DISPONIBLE,
+        tipo: isAlgunaMesaDisponible ? TipoDisponibilidad.DISPONIBLE : TipoDisponibilidad.NO_DISPONIBLE,
       });
     }
 
@@ -99,38 +84,25 @@ export class CalendarioService {
   }
 
   async getDisponibilidadHorariosFechaDiaAnteriorYPosterior(
-    turno: string,
-    personas: number,
-    fechaTurno: Date
+    params: IRequestDisponibilidadHorariosXFecha
   ): Promise<IDisponibilidadDiaHorarios[]> {
+    const { turno, personas, fecha: fechaTurno } = params;
     // Obtener fechas
     const diaAnterior = obtenerDiaAnterior(fechaTurno);
     const diaSiguiente = obtenerDiaSiguiente(fechaTurno);
 
     // Ejecutar cálculos en paralelo
-    const [
-      disponibilidadDiaAnterior,
-      disponibilidadFechaTurno,
-      disponibilidadDiaSiguiente,
-    ] = await Promise.all([
+    const [disponibilidadDiaAnterior, disponibilidadFechaTurno, disponibilidadDiaSiguiente] = await Promise.all([
       this.obtenerDisponibilidadDia(turno, personas, diaAnterior),
       this.obtenerDisponibilidadDia(turno, personas, fechaTurno),
       this.obtenerDisponibilidadDia(turno, personas, diaSiguiente),
     ]);
 
     // Retornar el array de respuestas
-    return [
-      disponibilidadDiaAnterior,
-      disponibilidadFechaTurno,
-      disponibilidadDiaSiguiente,
-    ];
+    return [disponibilidadDiaAnterior, disponibilidadFechaTurno, disponibilidadDiaSiguiente];
   }
 
-  private async obtenerDisponibilidadDia(
-    turno: string,
-    personas: number,
-    fecha: Date
-  ): Promise<IDisponibilidadDiaHorarios> {
+  private async obtenerDisponibilidadDia(turno: string, personas: number, fecha: Date): Promise<IDisponibilidadDiaHorarios> {
     const horariosFecha: IHorarios[] = [];
 
     if (obtenerDiaSemanaEnum(fecha) === DiaSemana.DOMINGO) {
@@ -142,22 +114,16 @@ export class CalendarioService {
       };
     }
 
-    const reservasXFechaYTurno =
-      await reservaService.getReservasByFechaAndTurno(fecha, turno);
+    const reservasXFechaYTurno = await reservaService.getReservasByFechaAndTurno(fecha, turno);
 
-    const horariosMesasOcupadasId: IHorarioMesasOcupadasId[] =
-      mesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas(
-        turno,
-        reservasXFechaYTurno
-      );
+    const horariosMesasOcupadasId: IHorarioMesasOcupadasId[] = mesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas(
+      turno,
+      reservasXFechaYTurno
+    );
 
     await Promise.all(
       horariosMesasOcupadasId.map(async (horario) => {
-        const mesasDisponibles =
-          await mesaService.buscarMesasDisponiblesPorCantPersonasParaReserva(
-            personas,
-            horario.mesasOcupadasId
-          );
+        const mesasDisponibles = await mesaService.buscarMesasDisponiblesPorCantPersonasParaReserva(personas, horario.mesasOcupadasId);
         horariosFecha.push({
           hora: horario.hora,
           disponible: mesasDisponibles.length > 0,
@@ -167,16 +133,12 @@ export class CalendarioService {
 
     horariosFecha.sort((a, b) => a.hora.localeCompare(b.hora));
 
-    const isAlgunHorarioDisponible = horariosFecha.some(
-      (horario) => horario.disponible
-    );
+    const isAlgunHorarioDisponible = horariosFecha.some((horario) => horario.disponible);
 
     return {
       fecha,
       disponible: isAlgunHorarioDisponible,
-      tipo: isAlgunHorarioDisponible
-        ? TipoDisponibilidad.DISPONIBLE
-        : TipoDisponibilidad.NO_DISPONIBLE,
+      tipo: isAlgunHorarioDisponible ? TipoDisponibilidad.DISPONIBLE : TipoDisponibilidad.NO_DISPONIBLE,
       horarios: horariosFecha,
     };
   }

@@ -24,3 +24,12 @@ export interface IHorarioMesasOcupadasId {
   hora: string;
   mesasOcupadasId: Types.ObjectId[];
 }
+
+export interface IRequestDisponibilidadDias {
+  turno: string;
+  personas: number;
+}
+
+export interface IRequestDisponibilidadHorariosXFecha extends IRequestDisponibilidadDias {
+  fecha: Date;
+}

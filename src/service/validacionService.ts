@@ -1,8 +1,10 @@
 import { ReservaModelType } from "../model/entity/reserva";
+import { IRequestDisponibilidadDias, IRequestDisponibilidadHorariosXFecha } from "../model/interface/calendarioInterface";
+import { validateTurnoPersonas, validateTurnoPersonasFecha } from "../model/validation/calendarioValidation";
 import { validateReserva } from "../model/validation/reservaValidation";
 
 export class ValidacionService {
-  async validarYPrepararReserva(data: any): Promise<ReservaModelType> {
+  async validarRequestAltaReserva(data: any): Promise<ReservaModelType> {
     const validate = await validateReserva(data);
     if (!validate.success) {
       const error = new Error("Errores de validación");
@@ -10,5 +12,25 @@ export class ValidacionService {
       throw error;
     }
     return validate.data as ReservaModelType; // Retorna los datos ya validados
+  }
+
+  async validarRequestDisponibilidadDias(data: any): Promise<IRequestDisponibilidadDias> {
+    const validate = await validateTurnoPersonas(data);
+    if (!validate.success) {
+      const error = new Error("Errores de validación");
+      (error as any).errors = validate.error.errors;
+      throw error;
+    }
+    return validate.data as IRequestDisponibilidadDias;
+  }
+
+  async validarRequestDisponibilidadHorariosXFecha(data: any): Promise<IRequestDisponibilidadHorariosXFecha> {
+    const validate = await validateTurnoPersonasFecha(data);
+    if (!validate.success) {
+      const error = new Error("Errores de validación");
+      (error as any).errors = validate.error.errors;
+      throw error;
+    }
+    return validate.data as IRequestDisponibilidadHorariosXFecha;
   }
 }
