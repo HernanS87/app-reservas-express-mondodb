@@ -19,13 +19,21 @@ export class ReservaController {
 
   async getById(req: Request, res: Response): Promise<Response> {
     try {
-      //validar id
-      const { id } = req.params;
+      const id = await validacionService.validarId(req.params);
       const reserva = await reservaService.getById(id);
       return reserva ? res.json(reserva) : res.status(404).json({ message: "Reserva not found" });
     } catch (error: any) {
       console.error(pc.red("❌ Error al buscar una reserva por id:"), error.message);
-      return res.status(500).json({ message: error.message });
+      // Verifica si el error tiene la propiedad 'errors' (indicando un error de validación)
+      if (error.errors) {
+        return res.status(400).json({
+          message: "Errores de validación",
+          errors: error.errors, // Devuelve los errores directamente
+        });
+      }
+
+      // Maneja otros errores
+      return res.status(500).json({ message: "Error interno del servidor" });
     }
   }
 
@@ -54,7 +62,7 @@ export class ReservaController {
 
   async delete(req: Request, res: Response): Promise<Response> {
     try {
-      //validar id
+      //Hay que hacer una baja lógica. No debería eliminarlo realmente de la base
       const { id } = req.params;
       const reserva = await reservaService.delete(id);
       return reserva ? res.json({ message: "Se eliminó la reserva con éxito!!" }) : res.status(404).json({ message: "Reserva not found" });

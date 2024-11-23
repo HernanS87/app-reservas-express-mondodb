@@ -17,7 +17,7 @@ export class ReservaService {
     return await reservaRepository.getAll();
   }
 
-  async getById(id: string): Promise<HydratedDocument<ReservaModelType> | null> {
+  async getById(id: Types.ObjectId): Promise<HydratedDocument<ReservaModelType> | null> {
     return await reservaRepository.getById(id);
   }
 

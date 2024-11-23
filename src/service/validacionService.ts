@@ -1,7 +1,9 @@
+import { Types } from "mongoose";
 import { ReservaModelType } from "../model/entity/reserva";
 import { IRequestDisponibilidadDias, IRequestDisponibilidadHorariosXFecha } from "../model/interface/calendarioInterface";
 import { validateTurnoPersonas, validateTurnoPersonasFecha } from "../model/validation/calendarioValidation";
 import { validateReserva } from "../model/validation/reservaValidation";
+import { validateId } from "../model/validation/idValidation";
 
 export class ValidacionService {
   async validarRequestAltaReserva(data: any): Promise<ReservaModelType> {
@@ -21,7 +23,7 @@ export class ValidacionService {
       (error as any).errors = validate.error.errors;
       throw error;
     }
-    return validate.data as IRequestDisponibilidadDias;
+    return validate.data;
   }
 
   async validarRequestDisponibilidadHorariosXFecha(data: any): Promise<IRequestDisponibilidadHorariosXFecha> {
@@ -31,6 +33,16 @@ export class ValidacionService {
       (error as any).errors = validate.error.errors;
       throw error;
     }
-    return validate.data as IRequestDisponibilidadHorariosXFecha;
+    return validate.data;
+  }
+
+  async validarId(data: any): Promise<Types.ObjectId> {
+    const validate = await validateId(data);
+    if (!validate.success) {
+      const error = new Error("Errores de validación");
+      (error as any).errors = validate.error.errors;
+      throw error;
+    }
+    return validate.data.id;
   }
 }
