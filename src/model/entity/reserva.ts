@@ -1,5 +1,12 @@
 import { InferSchemaType, Schema, model } from "mongoose";
 import { TipoTurno } from "../../enum/tipoTurnoEnum";
+import { HorasAlmuerzo } from "../../enum/horasAlmuerzoEnum";
+import { HorasCena } from "../../enum/horasCenaEnum";
+
+const validHours = [
+  ...Object.values(HorasCena),
+  ...Object.values(HorasAlmuerzo),
+];
 
 const reservaSchema = new Schema({
   nombreCliente: {
@@ -19,7 +26,7 @@ const reservaSchema = new Schema({
   },
   turno: {
     type: String,
-    enum: TipoTurno,
+    enum: Object.values(TipoTurno),
     required: true,
   },
   cantidadPersonas: {
@@ -38,18 +45,13 @@ const reservaSchema = new Schema({
   },
   hora: {
     type: String,
+    enum: validHours,
     required: true,
-    validate: {
-      validator: function (v: string) {
-        return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v); // Asegura formato "HH:MM"
-      },
-      message: (props: any) => `${props.value} no es un formato de hora válido!`,
-    },
   },
   estado: {
     type: String,
     enum: ["CONFIRMADA", "CANCELADA", "FINALIZADA"], // El estado FINALIZADA indica que asistieron al restaurante y ya liberaron la mesa
-    required: true,
+    default: "CONFIRMADA",
   },
   mesa: [
     {

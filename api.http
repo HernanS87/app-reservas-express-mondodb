@@ -25,12 +25,12 @@ POST http://localhost:1234/reservas
 Content-Type: application/json
 
 {
-  "nombreCliente": "PANCHO CUNNIETTI",
-  "email": "hernansantarelli87@gmail.com",
-  "fecha": "2024-11-13T03:00:00.000Z",
+  "nombreCliente": "Mauro Lobo",
+  "email": "random@gmail.com",
+  "fecha": "2024-11-23",
   "turno": "cena",
-  "hora": "20:30",
-  "cantidadPersonas": 4
+  "hora": "21:30",
+  "cantidadPersonas": 2
 }
 
 
@@ -42,7 +42,7 @@ POST http://localhost:1234/mesas
 Content-Type: application/json
 
 {
-  "capacidad": 6,
+  "capacidad": 10,
   "estado": "DISPONIBLE"
 }
 
@@ -59,11 +59,11 @@ Content-Type: application/json
 
 
 ###--------------------- dias disponibles --------------------
-GET http://localhost:1234/calendario/dias?turno=cena&personas=3
+GET http://localhost:1234/calendario/dias?turno=almuerzo&personas=2
 Content-Type: application/json
 
 ### /dias/:fecha/horarios
 
 ###--------------------- horarios x fecha --------------------
-GET http://localhost:1234/calendario/dias/2024-11-23/horarios?turno=almuerzo&personas=8
+GET http://localhost:1234/calendario/dias/2024-11-23/horarios?turno=cena&personas=2
 Content-Type: application/json

@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/cors": "2.8.17",
     "@testing-library/react-native": "^12.8.1",
     "@types/date-fns": "^2.6.3",
     "@types/express": "5.0.0",
