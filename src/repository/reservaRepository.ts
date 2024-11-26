@@ -16,7 +16,7 @@ export class ReservaRepository {
     return newReserva.save();
   }
 
-  delete(id: string): Promise<HydratedDocument<ReservaModelType> | null> {
+  delete(id: Types.ObjectId): Promise<HydratedDocument<ReservaModelType> | null> {
     return Reserva.findByIdAndDelete(id).exec();
   }
 

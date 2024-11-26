@@ -15,7 +15,7 @@ export class MesaService {
     return await mesaRepository.getAll();
   }
 
-  async getById(id: string): Promise<HydratedDocument<MesaModelType> | null> {
+  async getById(id: Types.ObjectId): Promise<HydratedDocument<MesaModelType> | null> {
     return await mesaRepository.getById(id);
   }
 
@@ -36,24 +36,14 @@ export class MesaService {
     const horariosMesasOcupadasId: IHorarioMesasOcupadasId[] = this.obtenerListaHorariosTurno(turno);
 
     reservasDelDia.forEach((reserva) => {
-      const inicioPeriodoIndisponibilidadMesasPorReserva = sumarORestarMinutos(
-        reserva.hora,
-        90,
-        "restar"
-      );
-      const finPeriodoIndisponibilidadMesasPorReserva = sumarORestarMinutos(
-        reserva.hora,
-        90,
-        "sumar"
-      );
+      const inicioPeriodoIndisponibilidadMesasPorReserva = sumarORestarMinutos(reserva.hora, 90, "restar");
+      const finPeriodoIndisponibilidadMesasPorReserva = sumarORestarMinutos(reserva.hora, 90, "sumar");
 
       horariosMesasOcupadasId.forEach((horario) => {
         if (
           horario.hora === reserva.hora ||
-          (horario.hora < reserva.hora &&
-            horario.hora > inicioPeriodoIndisponibilidadMesasPorReserva) ||
-          (horario.hora > reserva.hora &&
-            horario.hora < finPeriodoIndisponibilidadMesasPorReserva)
+          (horario.hora < reserva.hora && horario.hora > inicioPeriodoIndisponibilidadMesasPorReserva) ||
+          (horario.hora > reserva.hora && horario.hora < finPeriodoIndisponibilidadMesasPorReserva)
         ) {
           horario.mesasOcupadasId.push(...reserva.mesa);
         }
@@ -81,31 +71,20 @@ export class MesaService {
     mesasNoDisponiblesId: Types.ObjectId[]
   ): Promise<Types.ObjectId[]> {
     // 1. Buscar si hay una mesa con capacidad exacta
-    const mesaExacta = await mesaRepository.getMesaDisponiblePorCapacidad(
-      cantidadPersonas,
-      mesasNoDisponiblesId
-    );
+    const mesaExacta = await mesaRepository.getMesaDisponiblePorCapacidad(cantidadPersonas, mesasNoDisponiblesId);
 
     if (mesaExacta) {
       return [mesaExacta._id];
     }
 
     // 2. Busca la mesa más grande y cercana a la cantidad de personas
-    const mesaGrandeCercana =
-      await mesaRepository.getMesaDisponiblePorCapacidadMayorMasCercana(
-        cantidadPersonas,
-        mesasNoDisponiblesId
-      );
+    const mesaGrandeCercana = await mesaRepository.getMesaDisponiblePorCapacidadMayorMasCercana(cantidadPersonas, mesasNoDisponiblesId);
 
     if (mesaGrandeCercana) {
       return [mesaGrandeCercana._id];
     }
 
-    const { personasRestantes, mesasAsignadas } =
-      await this.buscarMesasConMenorCapacidad(
-        cantidadPersonas,
-        mesasNoDisponiblesId
-      );
+    const { personasRestantes, mesasAsignadas } = await this.buscarMesasConMenorCapacidad(cantidadPersonas, mesasNoDisponiblesId);
 
     // Si aún quedan personas y no se pueden acomodar, devolvemos un array vacío para indicar que no pudimos encontrar mesas para la reserva
     if (personasRestantes > 0) {
@@ -119,9 +98,7 @@ export class MesaService {
     cantidadPersonas: number,
     mesasNoDisponiblesId: Types.ObjectId[] = []
   ): Promise<{ personasRestantes: number; mesasAsignadas: Types.ObjectId[] }> {
-    const mesasDisponibles = await mesaRepository.getMesasDisponibles(
-      mesasNoDisponiblesId
-    );
+    const mesasDisponibles = await mesaRepository.getMesasDisponibles(mesasNoDisponiblesId);
 
     // 3. Buscar la mesa más pequeña cercana (capacidad < cantidadPersonas, pero la más grande posible)
     const mesaPequeñaCercana = mesasDisponibles
@@ -139,9 +116,7 @@ export class MesaService {
       personasRestantes -= mesaPequeñaCercana.capacidad;
     }
 
-    const mesasDisponiblesMenorCantPers = mesasDisponibles.filter(
-      (mesa) => mesa.capacidad <= cantidadPersonas
-    );
+    const mesasDisponiblesMenorCantPers = mesasDisponibles.filter((mesa) => mesa.capacidad <= cantidadPersonas);
     // 4. Si aún quedan personas, combinar mesas más pequeñas disponibles
     if (personasRestantes > 0) {
       for (const mesa of mesasDisponiblesMenorCantPers) {
@@ -169,11 +144,7 @@ export class MesaService {
     for (const horario of horariosMesasOcupadasId) {
       const mesasOcupadasId = [...new Set(horario.mesasOcupadasId)]; // Eliminamos repetidos
       try {
-        const mesasDisponibles =
-          await this.buscarMesasDisponiblesPorCantPersonasParaReserva(
-            personas,
-            mesasOcupadasId
-          );
+        const mesasDisponibles = await this.buscarMesasDisponiblesPorCantPersonasParaReserva(personas, mesasOcupadasId);
         if (mesasDisponibles.length > 0) {
           return true;
         }

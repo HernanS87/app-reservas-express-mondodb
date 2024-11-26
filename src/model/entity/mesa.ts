@@ -4,6 +4,7 @@ const mesaSchema = new Schema({
   numero: {
     type: Number,
     min: 1,
+    default: undefined,
   },
   capacidad: {
     type: Number,
@@ -12,7 +13,7 @@ const mesaSchema = new Schema({
   },
   fechaBaja: {
     type: Date,
-    default: null,
+    default: undefined,
   },
 });
 

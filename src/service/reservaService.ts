@@ -55,7 +55,7 @@ export class ReservaService {
     }
   }
 
-  async delete(id: string): Promise<HydratedDocument<ReservaModelType> | null> {
+  async delete(id: Types.ObjectId): Promise<HydratedDocument<ReservaModelType> | null> {
     const reservaDeleted = await reservaRepository.delete(id);
 
     // if (reservaDeleted) {
