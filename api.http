@@ -80,6 +80,18 @@ Content-Type: application/json
   "email": "hernansantarelli87@gmail.com"
 }
 
+### iniciar sesion
+POST http://localhost:1234/auth/login
+Content-Type: application/json
+
+{
+  "userName": "HernanSanta"
+}
+
+### Verificar link para iniciar sesion
+GET http://localhost:1234/auth/login/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NDdhOWIwZDRlZjFmOGVkYWYzZGJlMSIsImxvZ2luVG9rZW4iOiI5NWZhZjU4MWNlMTQ5NWU1N2FjOGZiZGMxNTQ2ODVkNTM5NTcxYzBhN2M1OTM3MWJhZTU5NGYwYjU3YzMzNDM3IiwiaWF0IjoxNzMyNzUxNTgxLCJleHAiOjE3MzI3NTI0ODF9.RPuhVRPSX-XTps6w8NAj9LLDT7OTwrdWfSRfWrPbdOg
+Content-Type: application/json
+
 
 ### Cerrar sesión
 GET http://localhost:1234/auth/logout
