@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "jest",
-    "dev": "ts-node-dev src/app.ts ",
-    "debug": "ts-node-dev --inspect-brk=9230 src/app.ts ",
+    "dev": "ts-node-dev src/main/app.ts ",
+    "debug": "ts-node-dev --inspect-brk=9230 src/main/app.ts ",
     "tsc": "tsc"
   },
   "author": "",

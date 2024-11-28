@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
-import { ReservaService } from "../reservaService";
-import { ReservaRepository } from "../../repository/reservaRepository";
-import { MesaService } from "../mesaService";
+import { ReservaService } from "../main/service/reservaService";
+import { ReservaRepository } from "../main/repository/reservaRepository";
+import { MesaService } from "../main/service/mesaService";
 
 jest.mock("../../repository/reservaRepository");
 jest.mock("../mesaService");
@@ -34,9 +34,7 @@ describe("ReservaService", () => {
 
     // Mock del servicio
     mockMesaService.buscarMesasDisponiblesPorCantPersonasParaReserva.mockResolvedValue(mockMesas);
-    mockMesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas.mockReturnValue(
-      mockHorariosMesasOcupadas
-    );
+    mockMesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas.mockReturnValue(mockHorariosMesasOcupadas);
     mockReservaRepository.save.mockResolvedValue({
       _id: mockId,
       ...mockReserva,
@@ -61,11 +59,6 @@ describe("ReservaService", () => {
     mockMesaService.buscarMesasDisponiblesPorCantPersonasParaReserva.mockResolvedValue([]);
     mockMesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas.mockReturnValue([]);
 
-    await expect(reservaService.save(mockReserva as any)).rejects.toThrow(
-      "No hay suficientes mesas disponibles para esta reserva"
-    );
+    await expect(reservaService.save(mockReserva as any)).rejects.toThrow("No hay suficientes mesas disponibles para esta reserva");
   });
 });
-
-
-
