@@ -1,12 +1,12 @@
-import { CalendarioService } from "../main/service/calendarioService";
-import { startOfDay, endOfDay } from "../main/util/dateUtil";
-import { TipoDisponibilidad } from "../main/enum/tipoDisponibilidadEnum";
-import { DiaSemana } from "../main/enum/diaSemanaEnum";
-import { MesaService } from "../main/service/mesaService";
-import { ReservaService } from "../main/service/reservaService";
-import { IRequestDisponibilidadDias } from "../main/model/interface/calendarioInterface";
+import { CalendarioService } from "../../main/service/calendarioService";
+import { startOfDay, endOfDay } from "../../main/util/dateUtil";
+import { TipoDisponibilidad } from "../../main/enum/tipoDisponibilidadEnum";
+import { DiaSemana } from "../../main/enum/diaSemanaEnum";
+import { MesaService } from "../../main/service/mesaService";
+import { ReservaService } from "../../main/service/reservaService";
+import { IRequestDisponibilidadDias } from "../../main/model/interface/calendarioInterface";
 
-jest.mock("../main/service/reservaService", () => {
+jest.mock("../../main/service/reservaService", () => {
   return {
     ReservaService: jest.fn().mockImplementation(() => {
       return {
@@ -16,7 +16,7 @@ jest.mock("../main/service/reservaService", () => {
   };
 });
 
-jest.mock("../main/service/mesaService", () => {
+jest.mock("../../main/service/mesaService", () => {
   return {
     MesaService: jest.fn().mockImplementation(() => {
       return {
