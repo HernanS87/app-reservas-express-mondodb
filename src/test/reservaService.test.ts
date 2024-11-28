@@ -3,8 +3,8 @@ import { ReservaService } from "../main/service/reservaService";
 import { ReservaRepository } from "../main/repository/reservaRepository";
 import { MesaService } from "../main/service/mesaService";
 
-jest.mock("../../repository/reservaRepository");
-jest.mock("../mesaService");
+jest.mock("../main/repository/reservaRepository");
+jest.mock("../main/service/mesaService");
 
 const mockMesaService = new MesaService() as jest.Mocked<MesaService>;
 const mockReservaRepository = new ReservaRepository() as jest.Mocked<ReservaRepository>;

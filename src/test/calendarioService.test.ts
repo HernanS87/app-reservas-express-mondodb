@@ -6,7 +6,7 @@ import { MesaService } from "../main/service/mesaService";
 import { ReservaService } from "../main/service/reservaService";
 import { IRequestDisponibilidadDias } from "../main/model/interface/calendarioInterface";
 
-jest.mock("../reservaService", () => {
+jest.mock("../main/service/reservaService", () => {
   return {
     ReservaService: jest.fn().mockImplementation(() => {
       return {
@@ -16,7 +16,7 @@ jest.mock("../reservaService", () => {
   };
 });
 
-jest.mock("../mesaService", () => {
+jest.mock("../main/service/mesaService", () => {
   return {
     MesaService: jest.fn().mockImplementation(() => {
       return {
