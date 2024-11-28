@@ -2,7 +2,7 @@ import { UserModelType } from "../model/entity/user";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { EmailService } from "./emailService";
-import { IPayloadTokenLogin } from "../model/interface/authInterface";
+import { IAuthTokenPayload, ILoginTokenPayload } from "../model/interface/authInterface";
 import { UserService } from "./userService";
 
 const userService = new UserService();
@@ -20,7 +20,7 @@ export class AuthService {
 
   async login(userData: UserModelType): Promise<void> {
     const user = await userService.findByEmailOrUserName(userData);
-    if (!user) throw new Error("Usuario no encontrado");
+    if (!user) throw new Error("Usuario no identificado");
 
     // Se genera un loginToken único para evitar reutilización de enlaces de inicio de sesión
     // y agregar una capa adicional de seguridad contra ataques de repetición (Replay Attacks).
@@ -37,14 +37,14 @@ export class AuthService {
   async verifyLogin(token: string): Promise<string> {
     try {
       // Verificar el token JWT
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as IPayloadTokenLogin;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as ILoginTokenPayload;
 
       // Buscar usuario por ID decodificado
       const user = await userService.findById(decoded.id);
-      if (!user) throw new Error("Usuario no encontrado");
+      if (!user) throw new Error("Usuario no identificado");
 
       // Generar token JWT de sesión
-      return jwt.sign({ id: user._id, username: user.userName }, process.env.JWT_SECRET!, {
+      return jwt.sign({ id: user._id, userName: user.userName } as IAuthTokenPayload, process.env.JWT_SECRET!, {
         expiresIn: "1h",
       });
     } catch (error) {

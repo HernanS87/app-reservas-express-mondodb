@@ -57,7 +57,7 @@ export class ValidacionService {
       (error as any).errors = validate.error.errors;
       throw error;
     }
-    return validate.data.id;
+    return validate.data;
   }
 
   async validarRequestRegisterUser(data: any): Promise<UserModelType> {

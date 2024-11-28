@@ -3,26 +3,13 @@ import { TipoTurno } from "../../enum/tipoTurnoEnum";
 import { HorasAlmuerzo } from "../../enum/horasAlmuerzoEnum";
 import { HorasCena } from "../../enum/horasCenaEnum";
 
-const validHours = [
-  ...Object.values(HorasCena),
-  ...Object.values(HorasAlmuerzo),
-];
+const validHours = [...Object.values(HorasCena), ...Object.values(HorasAlmuerzo)];
 
 const reservaSchema = new Schema({
-  nombreCliente: {
-    type: String,
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
     required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    validate: {
-      validator: function (v: string) {
-        // Expresión regular para validar formato de email
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-      },
-      message: (props: any) => `${props.value} no es un email válido!`,
-    },
   },
   turno: {
     type: String,

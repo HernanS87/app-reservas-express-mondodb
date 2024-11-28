@@ -1,6 +1,13 @@
 import { Types } from "mongoose";
 
-export interface IPayloadTokenLogin {
+interface IBaseId {
   id: Types.ObjectId;
+}
+
+export interface ILoginTokenPayload extends IBaseId {
   loginToken: string;
+}
+
+export interface IAuthTokenPayload extends IBaseId {
+  userName: string;
 }

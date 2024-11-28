@@ -3,12 +3,11 @@ import { Reserva, ReservaModelType } from "../model/entity/reserva";
 
 export class ReservaRepository {
   getAll(): Promise<HydratedDocument<ReservaModelType>[]> {
-    return Reserva.find().exec();
-    // return Reserva.find().populate("mesa"); // Esto reemplaza el ObjectId por el objeto completo de la colección "Mesa"
+    return Reserva.find().populate("user").exec();
   }
 
   getById(id: Types.ObjectId): Promise<HydratedDocument<ReservaModelType> | null> {
-    return Reserva.findById(id).exec();
+    return Reserva.findById(id).populate("user").exec();
   }
 
   save(reservaDto: ReservaModelType): Promise<HydratedDocument<ReservaModelType>> {

@@ -12,7 +12,7 @@ GET http://localhost:1234/reservas/
 
 
 ### Traer reserva por id
-GET http://localhost:1234/reservas/673f2715c394c2de1c0ad06d
+GET http://localhost:1234/reservas/6748c6b20d829b8d4616c94b
 
 
 ### Eliminar reserva
@@ -25,11 +25,9 @@ POST http://localhost:1234/reservas
 Content-Type: application/json
 
 {
-  "nombreCliente": "Mauro Lobo",
-  "email": "random@gmail.com",
-  "fecha": "2024-11-23",
+  "fecha": "2024-11-29",
   "turno": "cena",
-  "hora": "21:30",
+  "hora": "20:30",
   "cantidadPersonas": 2
 }
 
@@ -52,7 +50,7 @@ Content-Type: application/json
 
 ### TRAER MESA POR ID
 ### 
-GET http://localhost:1234/mesas/673e999ff163abba03246a43
+GET http://localhost:1234/mesas/673e999ff163abba03246a47
 Content-Type: application/json
 
 
@@ -64,7 +62,7 @@ Content-Type: application/json
 ### /dias/:fecha/horarios
 
 ###--------------------- horarios x fecha --------------------
-GET http://localhost:1234/calendario/dias/2024-11-23/horarios?turno=cena&personas=2
+GET http://localhost:1234/calendario/dias/2024-11-29/horarios?turno=cena&personas=2
 Content-Type: application/json
 
 
@@ -89,7 +87,7 @@ Content-Type: application/json
 }
 
 ### Verificar link para iniciar sesion
-GET http://localhost:1234/auth/login/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NDdhOWIwZDRlZjFmOGVkYWYzZGJlMSIsImxvZ2luVG9rZW4iOiI5NWZhZjU4MWNlMTQ5NWU1N2FjOGZiZGMxNTQ2ODVkNTM5NTcxYzBhN2M1OTM3MWJhZTU5NGYwYjU3YzMzNDM3IiwiaWF0IjoxNzMyNzUxNTgxLCJleHAiOjE3MzI3NTI0ODF9.RPuhVRPSX-XTps6w8NAj9LLDT7OTwrdWfSRfWrPbdOg
+GET http://localhost:1234/auth/login/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NDdhOWIwZDRlZjFmOGVkYWYzZGJlMSIsImxvZ2luVG9rZW4iOiIxMmNhNTIwMWM5MThmMGU5NDFkMTU2ZTdmNGI3YzRlMGE5MTc3NzczZGE5NDI4MmI3NTA1ZGFjNmEzYWY2OTc2IiwiaWF0IjoxNzMyODIyNTcxLCJleHAiOjE3MzI4MjM0NzF9.8ahPyhDPYoazMPwir3rpyCyWWSU4fuT3AXEULt-Lzuk
 Content-Type: application/json
 
 

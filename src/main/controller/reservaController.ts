@@ -19,7 +19,7 @@ export class ReservaController {
 
   async getById(req: Request, res: Response): Promise<Response> {
     try {
-      const id = await validacionService.validarId(req.params);
+      const id = await validacionService.validarId(req.params.id);
       const reserva = await reservaService.getById(id);
       return reserva ? res.json(reserva) : res.status(404).json({ message: "Reserva not found" });
     } catch (error: any) {
@@ -39,7 +39,8 @@ export class ReservaController {
 
   async save(req: Request, res: Response): Promise<Response> {
     try {
-      const reservaValidada = await validacionService.validarRequestAltaReserva(req.body);
+      const user = req.user?.id;
+      const reservaValidada = await validacionService.validarRequestAltaReserva({ ...req.body, user });
       const respuesta = await reservaService.save(reservaValidada);
       return res.status(201).json(respuesta);
     } catch (error: any) {
@@ -61,7 +62,7 @@ export class ReservaController {
   async delete(req: Request, res: Response): Promise<Response> {
     try {
       //Hay que hacer una baja lógica. No debería eliminarlo realmente de la base
-      const id = await validacionService.validarId(req.params);
+      const id = await validacionService.validarId(req.params.id);
       const reserva = await reservaService.delete(id);
       return reserva ? res.json({ message: "Se eliminó la reserva con éxito!!" }) : res.status(404).json({ message: "Reserva not found" });
     } catch (error: any) {

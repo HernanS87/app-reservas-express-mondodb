@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { IAuthTokenPayload } from "main/model/interface/authInterface";
 
 // Middleware para autenticar el token
 export function authenticateToken(req: Request, res: Response, next: NextFunction): void {
@@ -10,14 +11,14 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
     return;
   }
 
-  jwt.verify(token, process.env.JWT_SECRET!, (err: any) => {
+  jwt.verify(token, process.env.JWT_SECRET!, (err: any, decoded: any) => {
     if (err) {
       res.status(403).json({ message: "Token inválido o expirado" });
       return;
     }
 
     // Token válido: añade los datos del usuario a la solicitud y continúa
-    //req.user = decoded; // Extiende el tipo Request para incluir "user" (si es necesario)
+    req.user = decoded as IAuthTokenPayload;
     next(); // Continúa con el siguiente middleware o controlador
   });
 }

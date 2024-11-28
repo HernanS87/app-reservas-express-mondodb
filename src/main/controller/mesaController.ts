@@ -19,7 +19,7 @@ export class MesaController {
 
   async getById(req: Request, res: Response): Promise<Response> {
     try {
-      const id = await validacionService.validarId(req.params);
+      const id = await validacionService.validarId(req.params.id);
       const mesa = await mesaService.getById(id);
       return mesa ? res.json(mesa) : res.status(404).json({ message: "Mesa not found" });
     } catch (error: any) {

@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import { ReservaModelType } from "../model/entity/reserva";
 import { formatDateString } from "../util/dateUtil";
+import { UserModelType } from "main/model/entity/user";
 
 // Configuración del transporte de correos
 const transporter = nodemailer.createTransport({
@@ -17,17 +18,17 @@ export class EmailService {
   /**
    * Enviar correo de confirmación de reserva
    */
-  async enviarCorreoConfirmacion(reserva: ReservaModelType) {
-    const { email, cantidadPersonas, fecha, hora, nombreCliente } = reserva;
+  async enviarCorreoConfirmacion(reserva: ReservaModelType, user: UserModelType) {
+    const { cantidadPersonas, fecha, hora } = reserva;
 
     const fechaFormateada = formatDateString(fecha);
 
     const mailOptions = {
       from: '"Restaurante Don Mario" <emimimoutd@gmail.com>',
-      to: email,
+      to: user.email,
       subject: "Restaurante Don Mario - Confirmación de reserva",
       html: `
-          <h2>Hola ${nombreCliente}!</h2>
+          <h2>Hola ${user.userName}!</h2>
           <p>A continuación te enviamos los datos de tu reserva en nuestro restaurante:</p>
           <ul>
               <li><strong>Día:</strong> ${fechaFormateada}</li>
