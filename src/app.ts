@@ -5,6 +5,7 @@ import { connectDB } from "./config/db";
 import { reservaRouter } from "./route/reservaRouter";
 import { mesaRouter } from "./route/mesaRouter";
 import { calendarioRouter } from "./route/calendarioRouter";
+import { authRouter } from "./route/authRouter";
 
 const app = express();
 app.use(cors());
@@ -17,6 +18,7 @@ app.get("/", (_req, res) => {
   res.json({ mensaje: "Reserve su lugar en Restaurando Mario!!" });
 });
 
+app.use("/auth", authRouter);
 app.use("/reservas", reservaRouter);
 app.use("/mesas", mesaRouter);
 app.use("/calendario", calendarioRouter);

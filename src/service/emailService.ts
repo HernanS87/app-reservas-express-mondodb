@@ -1,7 +1,8 @@
 import nodemailer from "nodemailer";
 import { ReservaModelType } from "../model/entity/reserva";
+import { formatDateString } from "../util/dateUtil";
 
-// Configuración del transporte
+// Configuración del transporte de correos
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -12,41 +13,61 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const formatearFecha = (fecha: Date) => {
-  const opciones: Intl.DateTimeFormatOptions = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
-  return new Intl.DateTimeFormat("es-AR", opciones).format(fecha);
-};
+export class EmailService {
+  /**
+   * Enviar correo de confirmación de reserva
+   */
+  async enviarCorreoConfirmacion(reserva: ReservaModelType) {
+    const { email, cantidadPersonas, fecha, hora, nombreCliente } = reserva;
 
-export async function enviarCorreoConfirmacion(reserva: ReservaModelType) {
-  const { email, cantidadPersonas, fecha, hora, nombreCliente } = reserva;
+    const fechaFormateada = formatDateString(fecha);
 
-  const fechaFormateada = formatearFecha(fecha);
+    const mailOptions = {
+      from: '"Restaurante Don Mario" <emimimoutd@gmail.com>',
+      to: email,
+      subject: "Restaurante Don Mario - Confirmación de reserva",
+      html: `
+          <h2>Hola ${nombreCliente}!</h2>
+          <p>A continuación te enviamos los datos de tu reserva en nuestro restaurante:</p>
+          <ul>
+              <li><strong>Día:</strong> ${fechaFormateada}</li>
+              <li><strong>Hora:</strong> ${hora}</li>
+              <li><strong>Cantidad de personas:</strong> ${cantidadPersonas}</li>
+          </ul>
+          <p>¡Gracias por confiar en nosotros! Esperamos verte pronto.</p>
+      `,
+    };
 
-  const mailOptions = {
-    from: '"Restaurante Don Mario" <emimimoutd@gmail.com>',
-    to: email,
-    subject: "Restaurante Don Mario - Confirmación de reserva",
-    html: `
-            <h2>Hola ${nombreCliente}!</h2>
-            <p>A continuación te enviamos los datos de tu reserva en nuestro restaurante:</p>
-            <ul>
-                <li><strong>Día:</strong> ${fechaFormateada}</li>
-                <li><strong>Hora:</strong> ${hora}</li>
-                <li><strong>Cantidad de personas:</strong> ${cantidadPersonas}</li>
-            </ul>
-            <p>¡Gracias por confiar en nosotros! Esperamos verte pronto.</p>
-        `,
-  };
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log("Correo de confirmación enviado correctamente");
+    } catch (error) {
+      console.error("Error al enviar el correo de confirmación: ", error);
+      throw new Error("No se pudo enviar el correo de confirmación");
+    }
+  }
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log("Correo enviado correctamente");
-  } catch (error) {
-    console.error("Error al enviar el correo: ", error);
+  /**
+   * Enviar enlace de inicio de sesión
+   */
+  async enviarCorreoInicioSesion(email: string, token: string) {
+    //TODO a la hora del deploy o de probar con el front debo cambiar el loginURL
+    //para que apunte a una ruta del front y sea éste quien llame al back para verificar el login
+    // tambien debería cambiar el verbo GET a POST ya que todos son métodos q modifican el estado de las sesion
+    const loginUrl = `${process.env.BACKEND_URL}/auth/login/verify?token=${token}`;
+    const mailOptions = {
+      from: '"Restaurante Don Mario" <emimimoutd@gmail.com>',
+      to: email,
+      subject: "Inicia sesión en Restaurando Mario",
+      text: `Haz clic en el siguiente enlace para iniciar sesión: ${loginUrl}`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log("Correo de inicio de sesión enviado correctamente");
+    } catch (error) {
+      console.error("Error al enviar el correo de inicio de sesión: ", error);
+      throw new Error("No se pudo enviar el correo de inicio de sesión");
+    }
   }
 }
