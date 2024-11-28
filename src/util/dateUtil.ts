@@ -1,7 +1,8 @@
 import { DiaSemana } from "../enum/diaSemanaEnum";
-import { toZonedTime } from "date-fns-tz";
+import { format, toZonedTime } from "date-fns-tz";
 import config from "../config/config.json";
 import { startOfDay as dfnsStartOfDay, endOfDay as dfnsEndOfDay, addDays, isValid } from "date-fns";
+import { es } from "date-fns/locale";
 
 const RESTAURANT_TIME_ZONE = config.restaurantTimeZone;
 
@@ -13,7 +14,7 @@ const RESTAURANT_TIME_ZONE = config.restaurantTimeZone;
  */
 export function startOfDay(date: Date): Date {
   if (!isValid(date)) {
-    throw new Error('La fecha proporcionada no es válida.');
+    throw new Error("La fecha proporcionada no es válida.");
   }
   return dfnsStartOfDay(date);
 }
@@ -26,7 +27,7 @@ export function startOfDay(date: Date): Date {
  */
 export function endOfDay(date: Date): Date {
   if (!isValid(date)) {
-    throw new Error('La fecha proporcionada no es válida.');
+    throw new Error("La fecha proporcionada no es válida.");
   }
   return dfnsEndOfDay(date);
 }
@@ -52,7 +53,7 @@ export function sumarORestarMinutos(hora: string, minutos: number, operacion: "s
 
 /**
  * Función para convertir fechas a la zona horaria establecida
- * @param fecha 
+ * @param fecha
  * @returns La nueva fecha formateada.
  */
 export function convertirAFechaLocal(fecha: string): Date {
@@ -67,7 +68,7 @@ export function convertirAFechaLocal(fecha: string): Date {
  */
 export function obtenerDiaSiguiente(fecha: Date): Date {
   if (!isValid(fecha)) {
-    throw new Error('La fecha proporcionada no es válida.');
+    throw new Error("La fecha proporcionada no es válida.");
   }
   return addDays(fecha, 1);
 }
@@ -79,7 +80,27 @@ export function obtenerDiaSiguiente(fecha: Date): Date {
  */
 export function obtenerDiaAnterior(fecha: Date): Date {
   if (!isValid(fecha)) {
-    throw new Error('La fecha proporcionada no es válida.');
+    throw new Error("La fecha proporcionada no es válida.");
   }
   return addDays(fecha, -1);
+}
+
+/**
+ * Formatea una fecha en un formato amigable en español, respetando la zona horaria configurada.
+ * @param fecha - Fecha a formatear
+ * @returns Fecha formateada en el formato "EEEE, d 'de' MMMM 'de' yyyy".
+ * @throws Error si la fecha no es válida.
+ */
+export function formatDateString(fecha: Date): string {
+  if (!isValid(fecha)) {
+    throw new Error("La fecha proporcionada no es válida.");
+  }
+
+  // Convertir la fecha a la zona horaria configurada
+  const fechaLocal = toZonedTime(fecha, RESTAURANT_TIME_ZONE);
+
+  // Formatear la fecha
+  return format(fechaLocal, "EEEE, d 'de' MMMM 'de' yyyy", {
+    locale: es,
+  });
 }

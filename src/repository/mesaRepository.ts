@@ -8,7 +8,7 @@ export class MesaRepository {
     return Mesa.find().exec();
   }
 
-  getById(id: string): Promise<HydratedDocument<MesaModelType> | null> {
+  getById(id: Types.ObjectId): Promise<HydratedDocument<MesaModelType> | null> {
     return Mesa.findById(id).exec();
   }
 
@@ -21,18 +21,13 @@ export class MesaRepository {
     return Mesa.findByIdAndDelete(id).exec();
   }
 
-  update(
-    id: string,
-    updateData: Partial<MesaModelType>
-  ): Promise<HydratedDocument<MesaModelType> | null> {
+  update(id: string, updateData: Partial<MesaModelType>): Promise<HydratedDocument<MesaModelType> | null> {
     return Mesa.findByIdAndUpdate(id, updateData, { new: true }).exec();
   }
 
   // ------------------------- OTROS ----------------------------------
 
-  getMesasDisponibles(
-    mesasNoDisponiblesId: Types.ObjectId[] = []
-  ): Promise<HydratedDocument<MesaModelType>[]> {
+  getMesasDisponibles(mesasNoDisponiblesId: Types.ObjectId[] = []): Promise<HydratedDocument<MesaModelType>[]> {
     return Mesa.find({
       _id: { $nin: mesasNoDisponiblesId },
     })
@@ -62,7 +57,6 @@ export class MesaRepository {
       .sort({ capacidad: 1 })
       .exec();
   }
-
 }
 
 // ------------ ¿Por qué usamos HydratedDocument? -------------

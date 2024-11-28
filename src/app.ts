@@ -1,14 +1,18 @@
 import "./config/loadEnv";
 import express, { json } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db";
 import { reservaRouter } from "./route/reservaRouter";
 import { mesaRouter } from "./route/mesaRouter";
 import { calendarioRouter } from "./route/calendarioRouter";
+import { authRouter } from "./route/authRouter";
+import { authenticateToken } from "./middleware/authMiddleware";
 
 const app = express();
 app.use(cors());
 app.use(json());
+app.use(cookieParser());
 app.disable("x-powered-by");
 
 connectDB();
@@ -17,7 +21,8 @@ app.get("/", (_req, res) => {
   res.json({ mensaje: "Reserve su lugar en Restaurando Mario!!" });
 });
 
-app.use("/reservas", reservaRouter);
+app.use("/auth", authRouter);
+app.use("/reservas", authenticateToken, reservaRouter);
 app.use("/mesas", mesaRouter);
 app.use("/calendario", calendarioRouter);
 

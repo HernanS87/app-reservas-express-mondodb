@@ -12,7 +12,7 @@ GET http://localhost:1234/reservas/
 
 
 ### Traer reserva por id
-GET http://localhost:1234/reservas/67129cb374fd2cd2d0e73107
+GET http://localhost:1234/reservas/673f2715c394c2de1c0ad06d
 
 
 ### Eliminar reserva
@@ -42,8 +42,7 @@ POST http://localhost:1234/mesas
 Content-Type: application/json
 
 {
-  "capacidad": 10,
-  "estado": "DISPONIBLE"
+  "capacidad": 5
 }
 
 ### TRAER MESAS
@@ -52,8 +51,8 @@ Content-Type: application/json
 
 
 ### TRAER MESA POR ID
-### "6727e02684ec31264e7ada26","6727e00c84ec31264e7ada17"
-GET http://localhost:1234/mesas/6727e00c84ec31264e7ada17
+### 
+GET http://localhost:1234/mesas/673e999ff163abba03246a43
 Content-Type: application/json
 
 
@@ -66,4 +65,34 @@ Content-Type: application/json
 
 ###--------------------- horarios x fecha --------------------
 GET http://localhost:1234/calendario/dias/2024-11-23/horarios?turno=cena&personas=2
+Content-Type: application/json
+
+
+
+###--------------------- AUTH --------------------
+
+### Crear USUARIO e iniciar sesion
+POST http://localhost:1234/auth/register
+Content-Type: application/json
+
+{
+  "userName": "HernanSanta",
+  "email": "hernansantarelli87@gmail.com"
+}
+
+### iniciar sesion
+POST http://localhost:1234/auth/login
+Content-Type: application/json
+
+{
+  "userName": "HernanSanta"
+}
+
+### Verificar link para iniciar sesion
+GET http://localhost:1234/auth/login/verify?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NDdhOWIwZDRlZjFmOGVkYWYzZGJlMSIsImxvZ2luVG9rZW4iOiI5NWZhZjU4MWNlMTQ5NWU1N2FjOGZiZGMxNTQ2ODVkNTM5NTcxYzBhN2M1OTM3MWJhZTU5NGYwYjU3YzMzNDM3IiwiaWF0IjoxNzMyNzUxNTgxLCJleHAiOjE3MzI3NTI0ODF9.RPuhVRPSX-XTps6w8NAj9LLDT7OTwrdWfSRfWrPbdOg
+Content-Type: application/json
+
+
+### Cerrar sesión
+GET http://localhost:1234/auth/logout
 Content-Type: application/json
