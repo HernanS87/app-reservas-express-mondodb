@@ -1,62 +1,71 @@
+import { Types } from "mongoose";
 import { ReservaService } from "../reservaService";
 import { ReservaRepository } from "../../repository/reservaRepository";
 import { MesaService } from "../mesaService";
-import { Reserva } from "../../model/entity/reserva";
 
-import { Types } from "mongoose";
+jest.mock("../../repository/reservaRepository");
+jest.mock("../mesaService");
 
-// Mock de dependencias
-jest.mock("../../../repository/reservaRepository");
-jest.mock("../../../service/mesaService");
+const mockMesaService = new MesaService() as jest.Mocked<MesaService>;
+const mockReservaRepository = new ReservaRepository() as jest.Mocked<ReservaRepository>;
+const reservaService = new ReservaService();
 
 describe("ReservaService", () => {
-  let reservaService: ReservaService;
-  let mockReservaRepository: jest.Mocked<ReservaRepository>;
-  let mockMesaService: jest.Mocked<MesaService>;
-
-  beforeEach(() => {
-    mockReservaRepository = new ReservaRepository() as jest.Mocked<ReservaRepository>;
-    mockMesaService = new MesaService() as jest.Mocked<MesaService>;
-    reservaService = new ReservaService();
-
-    // Inyectar mocks
-    (reservaService as any).reservaRepository = mockReservaRepository;
-    (reservaService as any).mesaService = mockMesaService;
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it("debería guardar una reserva si hay mesas disponibles", async () => {
-    // Datos de prueba
     const mockReserva = {
       fecha: new Date(),
       turno: "CENA",
       hora: "20:00",
       cantidadPersonas: 4,
     };
+
     const mockMesas = [new Types.ObjectId()];
+    const mockId = new Types.ObjectId();
+    const mockHorariosMesasOcupadas = [
+      {
+        hora: "21:00",
+        mesasOcupadasId: [new Types.ObjectId()],
+      },
+    ];
 
-    // Configuración de mocks
+    // Mock del servicio
     mockMesaService.buscarMesasDisponiblesPorCantPersonasParaReserva.mockResolvedValue(mockMesas);
-    mockReservaRepository.save.mockResolvedValue(new Reserva({ ...mockReserva, mesa: mockMesas }));
+    mockMesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas.mockReturnValue(
+      mockHorariosMesasOcupadas
+    );
+    mockReservaRepository.save.mockResolvedValue({
+      _id: mockId,
+      ...mockReserva,
+      mesa: mockMesas,
+      estado: "CONFIRMADA",
+    } as any);
 
-    // Llamar al método y verificar resultado
     const result = await reservaService.save(mockReserva as any);
-    expect(result.mesa).toEqual(mockMesas);
-    expect(result.estado).toBe("CONFIRMADA");
-    expect(mockReservaRepository.save).toHaveBeenCalled();
+
+    expect(result.id).toEqual(mockId.toString());
   });
 
   it("debería lanzar un error si no hay mesas disponibles", async () => {
     const mockReserva = {
       fecha: new Date(),
       turno: "CENA",
-      hora: "20:00",
+      hora: "21:00",
       cantidadPersonas: 4,
     };
 
+    // Mock del servicio
     mockMesaService.buscarMesasDisponiblesPorCantPersonasParaReserva.mockResolvedValue([]);
+    mockMesaService.buscarMesasOcupadasPorTurnoYHorarioEnListaReservas.mockReturnValue([]);
 
     await expect(reservaService.save(mockReserva as any)).rejects.toThrow(
       "No hay suficientes mesas disponibles para esta reserva"
     );
   });
 });
+
+
+
