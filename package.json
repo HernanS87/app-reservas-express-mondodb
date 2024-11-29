@@ -1,13 +1,14 @@
 {
   "name": "app-reservas-restaurando-mario",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "API para realizar reservas a un restaurante",
-  "main": "app.js",
+  "main": "build/src/main/app.js",
   "scripts": {
     "test": "jest",
     "dev": "ts-node-dev src/main/app.ts ",
     "debug": "ts-node-dev --inspect-brk=9230 src/main/app.ts ",
-    "tsc": "tsc"
+    "build": "tsc",
+    "start": "npm run build && node build/src/main/app.js"
   },
   "author": "",
   "license": "ISC",

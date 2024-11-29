@@ -111,6 +111,7 @@
       "*": ["*"]
     }
   },
+  "include": ["src/**/*.ts"], // Incluye los archivos TypeScript
   "exclude": ["src/test", "**/*.test.ts"]               /* Excluyo los tests para que no se tengan en cuenta a la hora del build. */
 }
 
