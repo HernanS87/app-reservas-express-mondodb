@@ -1,4 +1,3 @@
-import "./loadEnv";
 import mongoose from "mongoose";
 import pc from "picocolors";
 
@@ -9,9 +8,6 @@ const connectionString = `mongodb+srv://${process.env.MONGO_ATLAS_USER}:${proces
 export const connectDB = async () => {
   try {
     console.log("Intentando conectar a la base de datos");
-    console.log("user: ", process.env.MONGO_ATLAS_USER);
-    console.log("pass: ", process.env.MONGO_ATLAS_PASS);
-    console.log("connectionString: ", connectionString);
     await mongoose.connect(connectionString);
     console.log("Conectado a la base de datos");
   } catch (error: any) {

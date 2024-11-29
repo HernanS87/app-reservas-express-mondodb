@@ -6,11 +6,12 @@ import { RespAltaReservaDto } from "../model/interface/reservaInterface";
 import { TipoError } from "../enum/tipoErrorEnum";
 import { IMensajeError, MensajeErrorDto } from "../model/interface/mensajeErrorInterface";
 import { UserService } from "./userService";
-// import { enviarCorreoConfirmacion } from "./emailService";
+import { EmailService } from "./emailService";
 
 const reservaRepository = new ReservaRepository();
 const mesaService = new MesaService();
 const userService = new UserService();
+const emailService = new EmailService();
 
 export class ReservaService {
   // ------------------------- CRUD ----------------------------------
@@ -53,9 +54,7 @@ export class ReservaService {
 
       respuesta.id = newReserva._id;
 
-      // Eliminamos el await para que no tengamos que esperar a que se haga el envio para responderle al usuario
-      // Pensar si deberiamos usar un try/catch para saber si hubo un error al enviar el email y si nos interesa avisarle al cliente
-      //enviarCorreoConfirmacion(newReserva, user);
+      emailService.enviarCorreoConfirmacion(newReserva, user);
 
       return respuesta;
     } catch (error: any) {
