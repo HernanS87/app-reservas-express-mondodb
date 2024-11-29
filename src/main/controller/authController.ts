@@ -45,13 +45,13 @@ export class AuthController {
 
   async verifyLogin(req: Request, res: Response): Promise<Response> {
     try {
-      const jwtToken = await authService.verifyLogin(req.query.token as string);
+      const { jwtToken, user } = await authService.verifyLogin(req.query.token as string);
       res.cookie("don-mario-token", jwtToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 3600000, // 1 hora
       });
-      return res.json({ userName: "Se inició sesión correctamente" });
+      return res.json({ userName: user.userName, email: user.email });
     } catch (error: any) {
       console.error(pc.red("❌ Error al iniciar sesion:"), error.message);
 

@@ -2,7 +2,7 @@ import { UserModelType } from "../model/entity/user";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { EmailService } from "./emailService";
-import { IAuthTokenPayload, ILoginTokenPayload } from "../model/interface/authInterface";
+import { IAuthTokenPayload, IAuthUserAndToken, ILoginTokenPayload } from "../model/interface/authInterface";
 import { UserService } from "./userService";
 
 const userService = new UserService();
@@ -34,7 +34,7 @@ export class AuthService {
     //acá puedo devolver un mjs de que ya se envio un correo para iniciar sesion o simplemente lo devuelvo en el controller
   }
 
-  async verifyLogin(token: string): Promise<string> {
+  async verifyLogin(token: string): Promise<IAuthUserAndToken> {
     try {
       // Verificar el token JWT
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as ILoginTokenPayload;
@@ -44,9 +44,12 @@ export class AuthService {
       if (!user) throw new Error("Usuario no identificado");
 
       // Generar token JWT de sesión
-      return jwt.sign({ id: user._id, userName: user.userName } as IAuthTokenPayload, process.env.JWT_SECRET!, {
-        expiresIn: "1h",
-      });
+      return {
+        jwtToken: jwt.sign({ id: user._id, userName: user.userName } as IAuthTokenPayload, process.env.JWT_SECRET!, {
+          expiresIn: "1h",
+        }),
+        user,
+      };
     } catch (error) {
       // Manejar errores de verificación de JWT
       if (error instanceof jwt.JsonWebTokenError) {
