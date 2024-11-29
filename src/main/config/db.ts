@@ -3,7 +3,7 @@ import pc from "picocolors";
 
 const { connection } = mongoose;
 
-const connectionString = "mongodb://localhost:27017/test";
+const connectionString = `mongodb+srv://${process.env.MONGO_ATLAS_USER}:${process.env.MONGO_ATLAS_PASS}@cluster0.kctfw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 export const connectDB = async () => {
   try {

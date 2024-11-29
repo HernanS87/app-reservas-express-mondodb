@@ -55,7 +55,7 @@ export class EmailService {
     //TODO a la hora del deploy o de probar con el front debo cambiar el loginURL
     //para que apunte a una ruta del front y sea éste quien llame al back para verificar el login
     // tambien debería cambiar el verbo GET a POST ya que todos son métodos q modifican el estado de las sesion
-    const loginUrl = `${process.env.BACKEND_URL}/auth/login/verify?token=${token}`;
+    const loginUrl = `${process.env.FRONTEND_URL}=${token}`;
     const mailOptions = {
       from: '"Restaurante Don Mario" <emimimoutd@gmail.com>',
       to: email,

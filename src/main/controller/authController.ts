@@ -51,7 +51,7 @@ export class AuthController {
         secure: process.env.NODE_ENV === "production",
         maxAge: 3600000, // 1 hora
       });
-      return res.json({ mensaje: "Se inició sesión correctamente" });
+      return res.json({ userName: "Se inició sesión correctamente" });
     } catch (error: any) {
       console.error(pc.red("❌ Error al iniciar sesion:"), error.message);
 
