@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { IAuthTokenPayload } from "main/model/interface/authInterface";
+import { IAuthTokenPayload } from "../model/interface/authInterface";
 
 // Middleware para autenticar el token
 export function authenticateToken(req: Request, res: Response, next: NextFunction): void {
