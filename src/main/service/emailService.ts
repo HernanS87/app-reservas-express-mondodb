@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { ReservaModelType } from "../model/entity/reserva";
 import { formatDateString } from "../util/dateUtil";
-import { UserModelType } from "main/model/entity/user";
+import { UserModelType } from "../model/entity/user";
 
 // Configuración del transporte de correos
 const transporter = nodemailer.createTransport({
