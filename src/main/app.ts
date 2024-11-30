@@ -10,7 +10,12 @@ import { authRouter } from "./route/authRouter";
 import { authenticateToken } from "./middleware/authMiddleware";
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://don-mario-kohl.vercel.app", // Cambia esto por el dominio de tu app front-end
+    credentials: true, // Habilita envío de cookies
+  })
+);
 app.use(json());
 app.use(cookieParser());
 app.disable("x-powered-by");
